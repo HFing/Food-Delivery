@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 
 import pymysql
+from oauthlib.common import CLIENT_ID_CHARACTER_SET
+
 pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -28,9 +30,25 @@ SECRET_KEY = 'django-insecure-cvn0*vjr7nnyd5fe^1pu@nmm^@#7!_n1vkm2@zc0j#zuru*x*x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+#Debug toolbar
 ALLOWED_HOSTS = []
 
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
 
+#cloudinary
+
+import cloudinary
+
+
+# Configuration
+cloudinary.config(
+    cloud_name = "deld9pk9w",
+    api_key = "643834121514273",
+    api_secret = "jyYpXUjaTrsjywRPYWEQ9UdIfI0",
+    secure=True
+)
 
 
 # Application definition
@@ -43,7 +61,18 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'fooddelivery',
+    'debug_toolbar',
+    'rest_framework',
+    'drf_yasg',
+    'cloudinary',
+    'oauth2_provider',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+    ),
+}
 
 AUTH_USER_MODEL = 'fooddelivery.User'
 
@@ -55,6 +84,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware'
 ]
 
 ROOT_URLCONF = 'fooddlrapi.urls'
@@ -132,3 +162,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+#CLIENT_ID = '2xIBWk4tVkZkqiVxSdnVIhTkLJMAthgWa178H0Js'
+#CLIENT_SECRET = 'EqxTR5JPGoS5cKbtLlBGJ68pvVIf5AsHZ442aGVnMD2I5Pfi5arXYY2JCJbyXoNzyWbnsfFksdi8tKCg8rgI6cN7HSFeYQeLPlUwS9k6UirkDUWIf136wWOLkxfi6BVg'

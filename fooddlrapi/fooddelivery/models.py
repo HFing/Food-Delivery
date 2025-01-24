@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from cloudinary.models import CloudinaryField
 
 # Create your models here.
 
@@ -12,6 +13,7 @@ class Base(models.Model):
 
 # User model (Thông tin người dùng)
 class User(AbstractUser, Base):
+    avatar = CloudinaryField('avatar', blank=True, null=True)
     is_store_owner = models.BooleanField(default=False)
     ROLE_CHOICES = [
         ('admin', 'Administrator'),
@@ -87,13 +89,12 @@ class OrderItem(Base):
     quantity = models.PositiveIntegerField(default=1)
 
 # Review model (Thông tin đánh giá)
-class Review(Base):
+class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='reviews')
-    menu_item = models.ForeignKey(Menu, on_delete=models.CASCADE, blank=True, null=True)
+    food = models.ForeignKey(Food, on_delete=models.CASCADE, blank=True, null=True)
     rating = models.PositiveIntegerField()  # Scale: 1-5
     comment = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Review by {self.user.username} for {self.store.name}"
