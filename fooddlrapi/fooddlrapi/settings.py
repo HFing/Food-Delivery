@@ -20,7 +20,6 @@ pymysql.install_as_MySQLdb()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -30,26 +29,24 @@ SECRET_KEY = 'django-insecure-cvn0*vjr7nnyd5fe^1pu@nmm^@#7!_n1vkm2@zc0j#zuru*x*x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-#Debug toolbar
+# Debug toolbar
 ALLOWED_HOSTS = []
 
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
-#cloudinary
+# cloudinary
 
 import cloudinary
 
-
 # Configuration
 cloudinary.config(
-    cloud_name = "deld9pk9w",
-    api_key = "643834121514273",
-    api_secret = "jyYpXUjaTrsjywRPYWEQ9UdIfI0",
+    cloud_name="deld9pk9w",
+    api_key="643834121514273",
+    api_secret="jyYpXUjaTrsjywRPYWEQ9UdIfI0",
     secure=True
 )
-
 
 # Application definition
 
@@ -66,6 +63,10 @@ INSTALLED_APPS = [
     'drf_yasg',
     'cloudinary',
     'oauth2_provider',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 REST_FRAMEWORK = {
@@ -84,8 +85,35 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware'
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by email
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    }
+}
+
+SITE_ID = 1
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
 
 ROOT_URLCONF = 'fooddlrapi.urls'
 
@@ -107,7 +135,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'fooddlrapi.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
@@ -120,7 +147,6 @@ DATABASES = {
         'HOST': ''
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -140,7 +166,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
@@ -152,7 +177,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
@@ -163,6 +187,5 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-#CLIENT_ID = '2xIBWk4tVkZkqiVxSdnVIhTkLJMAthgWa178H0Js'
-#CLIENT_SECRET = 'EqxTR5JPGoS5cKbtLlBGJ68pvVIf5AsHZ442aGVnMD2I5Pfi5arXYY2JCJbyXoNzyWbnsfFksdi8tKCg8rgI6cN7HSFeYQeLPlUwS9k6UirkDUWIf136wWOLkxfi6BVg'
+# CLIENT_ID = '2xIBWk4tVkZkqiVxSdnVIhTkLJMAthgWa178H0Js'
+# CLIENT_SECRET = 'EqxTR5JPGoS5cKbtLlBGJ68pvVIf5AsHZ442aGVnMD2I5Pfi5arXYY2JCJbyXoNzyWbnsfFksdi8tKCg8rgI6cN7HSFeYQeLPlUwS9k6UirkDUWIf136wWOLkxfi6BVg'

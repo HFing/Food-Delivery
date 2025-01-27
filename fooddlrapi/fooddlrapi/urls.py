@@ -23,6 +23,7 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
+
 schema_view = get_schema_view(
     openapi.Info(
         title="Food Delivery API",
@@ -38,6 +39,7 @@ schema_view = get_schema_view(
 urlpatterns = [
                   path('', include('fooddelivery.urls')),
                   path('admin/', admin_site.urls),
+                  path('accounts/', include('allauth.urls')),
                   path('__debug__/', include(debug_toolbar_urls())),
                   path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
                   re_path(r'^swagger(?P<format>\.json|\.yaml)$',
