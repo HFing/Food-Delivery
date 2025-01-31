@@ -7,12 +7,13 @@ import {
   TextInput,
   FlatList,
 } from 'react-native';
-import {FONTS, SIZES, COLORS, icons, dummyData} from '../../constants';
-import {HorizontalFoodCard, VerticalFoodCard} from '../../components';
+import { FONTS, SIZES, COLORS, icons, dummyData } from '../../constants';
+import { HorizontalFoodCard, VerticalFoodCard } from '../../components';
 import { useNavigation } from '@react-navigation/native';
 
 import FilterModel from './FilterModel';
-const Section = ({title, onPress, children}) => {
+
+const Section = ({ title, onPress, children }) => {
   return (
     <View>
       {/* Header */}
@@ -20,12 +21,12 @@ const Section = ({title, onPress, children}) => {
         style={{
           flexDirection: 'row',
           marginHorizontal: SIZES.padding,
-          marginTop: 30,
+          marginTop: 20,
           marginBottom: 20,
         }}>
-        <Text style={{flex: 1, ...FONTS.h3}}>{title}</Text>
+        <Text style={{ flex: 1, ...FONTS.h3 }}>{title}</Text>
         <TouchableOpacity onPress={onPress}>
-          <Text style={{color: COLORS.primary, ...FONTS.body3}}>Show all</Text>
+          <Text style={{ color: COLORS.primary, ...FONTS.body3 }}>Show all</Text>
         </TouchableOpacity>
       </View>
       {/* Content */}
@@ -40,7 +41,7 @@ const Home = () => {
   const [recommended, setRecommended] = React.useState([]);
   const [popular, setPopular] = React.useState([]);
   const [menuList, setMenuList] = React.useState([]);
-  const [showFilterModel,setShowFilterModel] = React.useState(false);
+  const [showFilterModel, setShowFilterModel] = React.useState(false);
 
   const navigation = useNavigation();
 
@@ -82,29 +83,48 @@ const Home = () => {
           paddingHorizontal: SIZES.radius,
           borderRadius: SIZES.radius,
           backgroundColor: COLORS.lightGray2,
+          marginTop: 50, // Thêm khoảng cách 10px từ đỉnh màn hình
         }}>
+        {/* menu icon */}
+        <TouchableOpacity
+          style={{
+            width: 40,
+            height: 40,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onPress={() => navigation.openDrawer()}
+        >
+          <Image
+            source={icons.menu}
+            style={{
+              width: 20,
+              height: 20,
+              tintColor: COLORS.black,
+            }}
+          />
+        </TouchableOpacity>
         {/* icon */}
         <Image
           source={icons.search}
-          style={{height: 20, width: 20, tintColor: COLORS.black}}
+          style={{ height: 20, width: 20, tintColor: COLORS.black }}
         />
         {/* text input */}
-
         <TextInput
-          style={{flex: 1, marginLeft: SIZES.radius, ...FONTS.body3}}
+          style={{ flex: 1, marginLeft: SIZES.radius, ...FONTS.body3 }}
           placeholder="Search food..."
         />
         {/* filter button */}
-
         <TouchableOpacity onPress={() => setShowFilterModel(true)}>
           <Image
             source={icons.filter}
-            style={{height: 20, width: 20, tintColor: COLORS.black}}
+            style={{ height: 20, width: 20, tintColor: COLORS.black }}
           />
         </TouchableOpacity>
       </View>
     );
   }
+
   function renderMenuType() {
     return (
       <FlatList
@@ -116,7 +136,7 @@ const Home = () => {
           marginTop: 30,
           marginBottom: 20,
         }}
-        renderItem={({item, index}) => (
+        renderItem={({ item, index }) => (
           <TouchableOpacity
             style={{
               marginLeft: SIZES.padding,
@@ -140,6 +160,7 @@ const Home = () => {
       />
     );
   }
+
   function renderPopular() {
     return (
       <Section title="Popular Near You" onPress={() => console.log('show all')}>
@@ -148,7 +169,7 @@ const Home = () => {
           keyExtractor={(item) => item.id}
           horizontal
           showsHorizontalScrollIndicat={false}
-          renderItem={({item, index}) => (
+          renderItem={({ item, index }) => (
             <VerticalFoodCard
               containerStyle={{
                 marginLeft: index == 0 ? SIZES.padding : 18,
@@ -172,7 +193,7 @@ const Home = () => {
           keyExtractor={(item) => item.id}
           horizontal
           showsHorizontalScrollIndicator={false}
-          renderItem={({item, index}) => (
+          renderItem={({ item, index }) => (
             <HorizontalFoodCard
               containerStyle={{
                 height: 180,
@@ -204,7 +225,7 @@ const Home = () => {
         keyExtractor={(item) => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
-        renderItem={({item, index}) => (
+        renderItem={({ item, index }) => (
           <TouchableOpacity
             style={{
               flexDirection: 'row',
@@ -225,7 +246,7 @@ const Home = () => {
             }}>
             <Image
               source={item.icon}
-              style={{marginTop: 5, height: 50, width: 50}}
+              style={{ marginTop: 5, height: 50, width: 50 }}
             />
             <Text
               style={{
@@ -244,22 +265,24 @@ const Home = () => {
       />
     );
   }
+
   function renderDelivaryTo() {
     return (
-      <View style={{marginTop: SIZES.padding, marginHorizontal: SIZES.padding}}>
-        <Text style={{color: COLORS.primary, ...FONTS.body3}}> DEIVERY TO</Text>
+      <View style={{ marginTop: SIZES.padding, marginHorizontal: SIZES.padding }}>
+        <Text style={{ color: COLORS.primary, ...FONTS.body3 }}> DEIVERY TO</Text>
         <TouchableOpacity
           style={{
             flexDirection: 'row',
             marginTop: SIZES.base,
             alignItems: 'center',
           }}>
-            <Text style={{...FONTS.h3}}>{dummyData?.myProfile?.address}</Text>
-            <Image style={{marginLeft:SIZES.base,height:20,width:20}} source={icons.down_arrow}/>
-          </TouchableOpacity>
+          <Text style={{ ...FONTS.h3 }}>{dummyData?.myProfile?.address}</Text>
+          <Image style={{ marginLeft: SIZES.base, height: 20, width: 20 }} source={icons.down_arrow} />
+        </TouchableOpacity>
       </View>
     );
   }
+
   return (
     <View
       style={{
@@ -267,10 +290,10 @@ const Home = () => {
       }}>
       {/* Search */}
       {renderSearch()}
-       {/* Filter */}
-       {showFilterModel && 
-       <FilterModel isVisible={showFilterModel} onClose={() => setShowFilterModel(false)}/>
-       }
+      {/* Filter */}
+      {showFilterModel &&
+        <FilterModel isVisible={showFilterModel} onClose={() => setShowFilterModel(false)} />
+      }
       {/* List */}
       <FlatList
         data={menuList}
@@ -290,7 +313,7 @@ const Home = () => {
             {renderMenuType()}
           </View>
         }
-        renderItem={({item, index}) => {
+        renderItem={({ item, index }) => {
           return (
             <HorizontalFoodCard
               containerStyle={{
@@ -310,7 +333,7 @@ const Home = () => {
           );
         }}
         ListFooterComponent={
-          <View style={{height:200}}/>
+          <View style={{ height: 200 }} />
         }
       />
     </View>

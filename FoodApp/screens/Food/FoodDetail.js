@@ -1,7 +1,7 @@
 import React from 'react';
-import {View, Text, Image, ScrollView} from 'react-native';
+import { View, Text, Image, ScrollView } from 'react-native';
 
-import {FONTS, COLORS, SIZES, icons, images, dummyData} from '../../constants';
+import { FONTS, COLORS, SIZES, icons, images, dummyData } from '../../constants';
 import {
   Header2,
   IconButton,
@@ -13,7 +13,8 @@ import {
   StepperInput,
 } from '../../components';
 
-const FoodDetail = ({navigation}) => {
+
+const FoodDetail = ({ navigation }) => {
   const [foodItem, setFoodItem] = React.useState(dummyData.vegBiryani);
   const [selectedSize, setSelectedSize] = React.useState('');
   const [qty, setQty] = React.useState(1);
@@ -74,9 +75,9 @@ const FoodDetail = ({navigation}) => {
               paddingHorizontal: SIZES.radius,
             }}>
             {/* calories */}
-            <View style={{flexDirection: 'row'}}>
-              <Image style={{width: 30, height: 30}} source={icons.calories} />
-              <Text style={{color: COLORS.darkGray2, ...FONTS.body4}}>
+            <View style={{ flexDirection: 'row' }}>
+              <Image style={{ width: 30, height: 30 }} source={icons.calories} />
+              <Text style={{ color: COLORS.darkGray2, ...FONTS.body4 }}>
                 {foodItem?.calories} Calories
               </Text>
             </View>
@@ -94,14 +95,14 @@ const FoodDetail = ({navigation}) => {
           <Image
             source={foodItem?.image}
             resizeMode="contain"
-            style={{height: 170, width: '100%'}}
+            style={{ height: 170, width: '100%' }}
           />
         </View>
 
         {/* Food info */}
-        <View style={{marginTop: SIZES.padding}}>
+        <View style={{ marginTop: SIZES.padding }}>
           {/* Name and Description */}
-          <Text style={{...FONTS.h1}}>{foodItem?.name}</Text>
+          <Text style={{ ...FONTS.h1 }}>{foodItem?.name}</Text>
           <Text
             style={{
               ...FONTS.body3,
@@ -112,13 +113,13 @@ const FoodDetail = ({navigation}) => {
             {foodItem?.description}
           </Text>
           {/* rating,duration,shipping */}
-          <View style={{flexDirection: 'row', marginTop: SIZES.padding}}>
+          <View style={{ flexDirection: 'row', marginTop: SIZES.padding }}>
             {/* rating */}
             <IconLabel
-              containerStyle={{backgroundColor: COLORS.primary}}
+              containerStyle={{ backgroundColor: COLORS.primary }}
               icon={icons.star}
               label="4.5"
-              labelStyle={{color: COLORS.white}}
+              labelStyle={{ color: COLORS.white }}
             />
             {/* duration */}
             <IconLabel
@@ -127,7 +128,7 @@ const FoodDetail = ({navigation}) => {
                 marginLeft: SIZES.radius,
               }}
               icon={icons.clock}
-              iconStyle={{tintColor: COLORS.black}}
+              iconStyle={{ tintColor: COLORS.black }}
               label="30 Mins"
             />
             {/* shipping */}
@@ -137,7 +138,7 @@ const FoodDetail = ({navigation}) => {
                 marginLeft: SIZES.radius,
               }}
               icon={icons.dollar}
-              iconStyle={{tintColor: COLORS.black}}
+              iconStyle={{ tintColor: COLORS.black }}
               label="Free Shipping"
             />
           </View>
@@ -149,7 +150,7 @@ const FoodDetail = ({navigation}) => {
               marginTop: SIZES.padding,
               alignItems: 'center',
             }}>
-            <Text style={{...FONTS.h3}}>Sizes</Text>
+            <Text style={{ ...FONTS.h3 }}>Sizes</Text>
             <View
               style={{
                 flexDirection: 'row',
@@ -199,18 +200,18 @@ const FoodDetail = ({navigation}) => {
         }}>
         <Image
           source={images.profile}
-          style={{width: 50, height: 50, borderRadius: SIZES.radius}}
+          style={{ width: 50, height: 50, borderRadius: SIZES.radius }}
         />
         {/* Info */}
         <View
-          style={{flex: 1, marginLeft: SIZES.radius, justifyContent: 'center'}}>
-          <Text style={{...FONTS.h3}}>Bombay hotel</Text>
-          <Text style={{color: COLORS.gray, ...FONTS.body4}}>
+          style={{ flex: 1, marginLeft: SIZES.radius, justifyContent: 'center' }}>
+          <Text style={{ ...FONTS.h3 }}>Bombay hotel</Text>
+          <Text style={{ color: COLORS.gray, ...FONTS.body4 }}>
             1.2 KM from from you
           </Text>
         </View>
         {/* Rating */}
-        <Rating rating={4} iconStyle={{marginLeft: 3}} />
+        <Rating rating={4} iconStyle={{ marginLeft: 3 }} />
       </View>
     );
   };
@@ -243,8 +244,8 @@ const FoodDetail = ({navigation}) => {
             height: 60,
             marginLeft: SIZES.radius,
             paddingHorizontal: SIZES.radius,
-            borderRadius:SIZES.radius,
-            backgroundColor:COLORS.primary
+            borderRadius: SIZES.radius,
+            backgroundColor: COLORS.primary
           }}
           label="Buy Now"
           label2="$15.99"
