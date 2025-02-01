@@ -55,7 +55,7 @@ class Food(Base):
     name = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField(blank=True, null=True)
-    #image = models.ImageField
+    image = CloudinaryField('image', blank=True, null=True)
     is_available = models.BooleanField(default=True)
     menu = models.ForeignKey(Menu, on_delete=models.SET_NULL, related_name='foods', null=True, blank=True)
     def __str__(self):

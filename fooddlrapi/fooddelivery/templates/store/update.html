@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Store Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .update-container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 700px;
+            text-align: center;
+        }
+        .update-container h1 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-size: 24px;
+        }
+        .update-container input, .update-container textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .update-container button {
+            width: 100%;
+            padding: 12px;
+            background: #3498db;
+            border: none;
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            font-size: 16px;
+        }
+        .update-container button:hover {
+            background: #2980b9;
+        }
+        .update-container input:focus, .update-container textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+        .back-button {
+            background: #95a5a6;
+            margin-top: 10px;
+        }
+        .back-button:hover {
+            background: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="update-container">
+        <h1>Update Store Information</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <label for="avatar">Upload Store Avatar:</label>
+            <input type="file" name="avatar" accept="image/*">
+            <button type="submit">Update</button>
+        </form>
+        <button class="back-button" onclick="window.history.back()">Back</button>
+    </div>
+</body>
+</html>

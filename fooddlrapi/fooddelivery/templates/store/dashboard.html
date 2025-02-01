@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Store Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            display: flex;
+        }
+        .sidebar {
+            width: 250px;
+            background: #2c3e50;
+            padding: 20px;
+            height: 100vh;
+            color: white;
+        }
+        .sidebar h2 {
+            text-align: center;
+        }
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .sidebar ul li a {
+            text-decoration: none;
+            color: white;
+            display: block;
+            transition: 0.3s;
+        }
+        .sidebar ul li a:hover {
+            background: #1a252f;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            background: white;
+        }
+        .header {
+            background: #3498db;
+            padding: 15px;
+            text-align: center;
+            color: white;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Store Dashboard</h2>
+        <ul>
+            <li><a href="/store/menu_food_management">Quản lý menu & Food</a></li>
+            <li><a href="#">Nhận & xác nhận đơn hàng</a></li>
+            <li><a href="#">Quản lý thanh toán & giao hàng</a></li>
+            <li><a href="#">Xử lý đánh giá & bình luận</a></li>
+            <li><a href="update">Cập nhật thông tin cửa hàng</a></li>
+        </ul>
+    </div>
+    <div class="content">
+        <div class="header">Welcome to Store Dashboard</div>
+        <p>Chọn một chức năng từ thanh menu bên trái.</p>
+    </div>
+</body>
+</html>

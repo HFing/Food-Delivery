@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Food & Menu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 50px 0px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+        }
+        .form-section {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            gap: 10px;
+        }
+        .menu-container, .food-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 48%;
+        }
+        .list-section {
+            margin-top: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .menu-list, .food-list {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 48%;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        form p {
+            margin-bottom: 15px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .menu-item, .food-item {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        .menu-item:last-child, .food-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-section">
+            <div class="menu-container">
+                <h2>Create/Update Menu</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ menu_form.as_p }}
+                    <button type="submit">Save</button>
+                </form>
+            </div>
+            <div class="food-container">
+                <h2>Create/Update Food</h2>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ food_form.as_p }}
+                    <button type="submit">Save</button>
+                </form>
+            </div>
+        </div>
+        <div class="list-section">
+            <div class="menu-list">
+                <h2>Existing Menus</h2>
+                {% for menu in menus %}
+                    <div class="menu-item">
+                        <strong>{{ menu.name }}</strong> ({{ menu.time_slot }}) - {{ menu.store.name }}
+                        <a href="{% url 'menu_update' menu.id %}">Edit</a>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="food-list">
+                <h2>Existing Foods</h2>
+                {% for food in foods %}
+                    <div class="food-item">
+                        <strong>{{ food.name }}</strong> - {{ food.price }} - {{ food.store.name }}
+                        <a href="{% url 'food_update' food.id %}">Edit</a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
