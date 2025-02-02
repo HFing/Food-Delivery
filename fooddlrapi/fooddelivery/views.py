@@ -15,32 +15,93 @@ from django.contrib import messages
 from django.views.generic.edit import CreateView, UpdateView
 from .models import Menu, Food
 from .forms import MenuForm, FoodForm
+from django.contrib.auth import logout
+import random
+from django.http import JsonResponse, HttpResponseNotFound
+from django.utils import timezone
+
 
 
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
-    queryset = User.objects.all()
+    queryset = User.objects.filter(is_active=True)
     serializer_class = serializers.UserSerializer
-    parsers_classes = [parsers.MultiPartParser]
 
-    def get_permissions(self):
-        if self.action.__eq__('current_user'):
-            return [permissions.IsAuthenticated()]
-        return [permissions.AllowAny()]
-
-    @action(methods=['get'], url_name='current_user', detail=False)
-    def current_user(self, request):
+    @action(methods=['get'], url_path='current-user', detail=False, permission_classes=[permissions.IsAuthenticated])
+    def get_user(self, request):
         return Response(serializers.UserSerializer(request.user).data)
 
 
 class StoreViewSet(viewsets.ModelViewSet):
-    queryset = Store.objects.all()
+    queryset = Store.objects.filter(is_active=True)
     serializer_class = serializers.StoreSerializer
+
+    @action(methods=['get'], detail=False, url_path='list', permission_classes=[permissions.AllowAny])
+    def get_stores(self, request):
+        stores = Store.objects.filter(is_active=True)
+        serializer = self.get_serializer(stores, many=True)
+        return Response(serializer.data)
+
+    @action(methods=['get'], detail=True, url_path='foods', permission_classes=[permissions.IsAuthenticated])
+    def get_foods(self, request, pk=None):
+        store = self.get_object()
+        foods = Food.objects.filter(store=store)
+        serializer = serializers.FoodSerializer(foods, many=True)
+        return Response(serializer.data)
+
+    @action(methods=['get'], detail=True, url_path='menus/(?P<menu_id>[^/.]+)/foods',
+            permission_classes=[permissions.IsAuthenticated])
+    def get_menu_foods(self, request, pk=None, menu_id=None):
+        store = self.get_object()
+        foods = Food.objects.filter(store=store, menu_id=menu_id)
+        serializer = serializers.FoodSerializer(foods, many=True)
+        return Response(serializer.data)
+
+class MenuViewSet(viewsets.ModelViewSet):
+    queryset = Menu.objects.all()
+    serializer_class = serializers.MenuSerializer
+
+class FoodViewSet(viewsets.ModelViewSet):
+    queryset = Food.objects.all()
+    serializer_class = serializers.FoodSerializer
+
+    @action(methods=['get'], detail=False, url_path='search', permission_classes=[permissions.IsAuthenticated])
+    def search_foods(self, request):
+        name = request.query_params.get('name', None)
+        price = request.query_params.get('price', None)
+        food_type = request.query_params.get('type', None)
+        store = request.query_params.get('store', None)
+
+        foods = Food.objects.all()
+
+        if name:
+            foods = foods.filter(name__icontains=name)
+        if price:
+            foods = foods.filter(price=price)
+        if food_type:
+            foods = foods.filter(type__icontains=food_type)
+        if store:
+            foods = foods.filter(store__name__icontains=store)
+
+        serializer = serializers.FoodSerializer(foods, many=True)
+        return Response(serializer.data)
+
+    @action(methods=['get'], detail=False, url_path='random-foods', permission_classes=[permissions.AllowAny])
+    def get_random_foods(self, request):
+        active_stores = Store.objects.filter(is_active=True)
+        foods = Food.objects.filter(store__in=active_stores)
+        random_foods = random.sample(list(foods), min(len(foods), 5))
+        serializer = self.get_serializer(random_foods, many=True)
+        return Response(serializer.data)
 
 @login_required
 def store_dashboard(request):
     if request.user.role != 'store':
         return HttpResponseForbidden("You are not authorized to access this page.")
     return render(request, 'store/dashboard.html')
+
+def custom_logout_view(request):
+    logout(request)
+    return redirect('/login')
 
 class CustomLoginView(View):
     def get(self, request):
@@ -160,3 +221,26 @@ class MenuFoodManagementView(View):
             food_form.instance.store = request.user.store
             food_form.save()
         return redirect('menu_food_management')
+
+
+class OrdersByDateView(View):
+    def get(self, request):
+        date = request.GET.get('date', timezone.now().date())
+        orders = Order.objects.filter(created_at__date=date, store__owner=request.user)
+        return render(request, 'store/orders_by_date.html', {'orders': orders, 'selected_date': date})
+
+class OrderDetailView(View):
+    def get(self, request, order_id):
+        try:
+            order = Order.objects.get(id=order_id, store__owner=request.user)
+        except Order.DoesNotExist:
+            return HttpResponseNotFound("Order not found")
+
+        items = order.order_items.all()
+        data = {
+            'user': order.user.username,
+            'total_amount': str(order.total_amount),
+            'status': order.status,
+            'items': [{'menu_item': item.menu_item.name, 'quantity': item.quantity} for item in items]
+        }
+        return JsonResponse(data)

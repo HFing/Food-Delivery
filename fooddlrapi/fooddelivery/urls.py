@@ -1,12 +1,15 @@
 from django.urls import include, path
 from rest_framework import routers
 from fooddelivery import views
-from .views import store_dashboard, CustomLoginView, StoreRegistrationView, StoreUpdateView, MenuCreateView, MenuFoodManagementView, FoodCreateView, MenuUpdateView, FoodUpdateView
+from .views import store_dashboard, CustomLoginView, StoreRegistrationView, StoreUpdateView, MenuCreateView, MenuFoodManagementView, FoodCreateView, MenuUpdateView, FoodUpdateView,custom_logout_view, OrdersByDateView, OrderDetailView
 from django.contrib.auth import views as auth_views
 
 routers = routers.DefaultRouter()
 routers.register(r'stores', views.StoreViewSet, basename='store')
 routers.register(r'users', views.UserViewSet, basename='user')
+routers.register(r'menus', views.MenuViewSet, basename='menu')
+routers.register(r'foods', views.FoodViewSet, basename='food')
+
 
 urlpatterns = [
     path('', include(routers.urls)),
@@ -19,4 +22,7 @@ urlpatterns = [
     path('store/menu_food_management/', MenuFoodManagementView.as_view(), name='menu_food_management'),
     path('store/menu/<int:pk>/update/', MenuUpdateView.as_view(), name='menu_update'),
     path('store/food/<int:pk>/update/', FoodUpdateView.as_view(), name='food_update'),
+    path('logout/', custom_logout_view, name='logout'),
+path('store/orders/', OrdersByDateView.as_view(), name='orders_by_date'),
+    path('store/order/<int:order_id>/details/', OrderDetailView.as_view(), name='order_details'),
 ]
