@@ -169,6 +169,11 @@ class FoodCreateView(CreateView):
     template_name = 'store/food_form.html'
     success_url = '/store'
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
         form.instance.store = self.request.user.store
         return super().form_valid(form)
@@ -185,21 +190,26 @@ class FoodUpdateView(UpdateView):
     template_name = 'store/food_form.html'
     success_url = '/store/menu_food_management'
 
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        form.fields['menu'].queryset = Menu.objects.filter(store=self.request.user.store)
-        return form
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.store = self.request.user.store
+        return super().form_valid(form)
 
 class MenuFoodManagementView(View):
     def get(self, request):
         menu_form = MenuForm()
-        food_form = FoodForm()
+        food_form = FoodForm(user=request.user)
         menus = Menu.objects.filter(store=request.user.store)
-        return render(request, 'store/menu_food_management.html', {'menu_form': menu_form, 'food_form': food_form, 'menus': menus})
+        foods = Food.objects.filter(store=request.user.store)
+        return render(request, 'store/menu_food_management.html', {'menu_form': menu_form, 'food_form': food_form, 'menus': menus, 'foods': foods})
 
     def post(self, request):
         menu_form = MenuForm(request.POST)
-        food_form = FoodForm(request.POST, request.FILES)
+        food_form = FoodForm(request.POST, request.FILES, user=request.user)
         if menu_form.is_valid():
             menu_form.instance.store = request.user.store
             menu_form.save()

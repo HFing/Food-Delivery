@@ -46,9 +46,17 @@ class MenuForm(forms.ModelForm):
         model = Menu
         fields = ['name', 'time_slot']
 
+
+
 class FoodForm(forms.ModelForm):
     image = forms.ImageField(required=False)
 
     class Meta:
         model = Food
         fields = ['name', 'price', 'description', 'is_available', 'menu', 'image']
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(FoodForm, self).__init__(*args, **kwargs)
+        if user:
+            self.fields['menu'].queryset = Menu.objects.filter(store=user.store)
