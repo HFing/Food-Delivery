@@ -37,18 +37,11 @@ INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
-# cloudinary
 
-import cloudinary
+import os
 
-# Configuration
-cloudinary.config(
-    cloud_name="deld9pk9w",
-    api_key="643834121514273",
-    api_secret="jyYpXUjaTrsjywRPYWEQ9UdIfI0",
-    secure=True
-)
-
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Application definition
 
 INSTALLED_APPS = [

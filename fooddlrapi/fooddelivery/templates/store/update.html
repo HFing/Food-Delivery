@@ -59,6 +59,13 @@
         .back-button:hover {
             background: #7f8c8d;
         }
+        .avatar-preview {
+            margin-bottom: 20px;
+        }
+        .avatar-preview img {
+            max-width: 100px;
+            border-radius: 50%;
+        }
     </style>
 </head>
 <body>
@@ -69,6 +76,11 @@
             {{ form.as_p }}
             <label for="avatar">Upload Store Avatar:</label>
             <input type="file" name="avatar" accept="image/*">
+            {% if form.instance.owner.avatar %}
+                <div class="avatar-preview">
+                    <img src="{{ form.instance.owner.avatar.url }}" alt="Current Avatar">
+                </div>
+            {% endif %}
             <button type="submit">Update</button>
         </form>
         <button class="back-button" onclick="window.history.back()">Back</button>

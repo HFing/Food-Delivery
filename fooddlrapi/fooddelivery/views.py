@@ -185,6 +185,11 @@ class FoodUpdateView(UpdateView):
     template_name = 'store/food_form.html'
     success_url = '/store/menu_food_management'
 
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['menu'].queryset = Menu.objects.filter(store=self.request.user.store)
+        return form
+
 class MenuFoodManagementView(View):
     def get(self, request):
         menu_form = MenuForm()

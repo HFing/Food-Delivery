@@ -13,7 +13,7 @@ class Base(models.Model):
 
 # User model (Thông tin người dùng)
 class User(AbstractUser, Base):
-    avatar = CloudinaryField('avatar', blank=True, null=True)
+    avatar = models.ImageField(upload_to='avatars/',blank=True, null=True)
     is_store_owner = models.BooleanField(default=False)
     ROLE_CHOICES = [
         ('admin', 'Administrator'),
@@ -55,7 +55,8 @@ class Food(Base):
     name = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField(blank=True, null=True)
-    image = CloudinaryField('image', blank=True, null=True)
+    image = models.ImageField(upload_to='food_images/', blank=True, null=True)
+    # image = CloudinaryField('image', blank=True, null=True)
     is_available = models.BooleanField(default=True)
     menu = models.ForeignKey(Menu, on_delete=models.SET_NULL, related_name='foods', null=True, blank=True)
     def __str__(self):

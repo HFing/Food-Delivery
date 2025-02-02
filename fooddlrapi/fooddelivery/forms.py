@@ -8,7 +8,7 @@ class StoreRegistrationForm(forms.ModelForm):
     store_description = forms.CharField(widget=forms.Textarea, required=False)
     store_address = forms.CharField(max_length=255)
     store_location = forms.CharField(max_length=255)
-    avatar = CloudinaryFileField()
+    avatar = forms.ImageField(required=False)  # Updated line
 
     class Meta:
         model = User
@@ -41,15 +41,13 @@ class StoreUpdateForm(forms.ModelForm):
         model = Store
         fields = ['name', 'description', 'address', 'location']
 
-
-
 class MenuForm(forms.ModelForm):
     class Meta:
         model = Menu
         fields = ['name', 'time_slot']
 
 class FoodForm(forms.ModelForm):
-    image = CloudinaryFileField(widget=forms.FileInput())
+    image = forms.ImageField(required=False)
 
     class Meta:
         model = Food
