@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, FlatList, TouchableOpacity } from 'react-native';
 import { FONTS, SIZES, COLORS, icons } from '../../constants';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import axios from '../../configs/APIs';
+import axios, { endpoints } from '../../configs/APIs';
+import { StepperInput, TextButton } from '../../components'; // Import StepperInput and TextButton
 
 const StoreDetail = () => {
   const [store, setStore] = useState(null);
   const [foods, setFoods] = useState([]);
+  const [quantities, setQuantities] = useState({});
   const navigation = useNavigation();
   const route = useRoute();
   const { storeId } = route.params;
@@ -18,7 +20,7 @@ const StoreDetail = () => {
 
   const loadStoreDetails = async () => {
     try {
-      let res = await axios.get(`/stores/${storeId}/`);
+      let res = await axios.get(endpoints.storeDetails(storeId));
       setStore(res.data);
     } catch (error) {
       console.error('Error fetching store details:', error);
@@ -27,12 +29,39 @@ const StoreDetail = () => {
 
   const loadStoreFoods = async () => {
     try {
-      let res = await axios.get(`/stores/${storeId}/foods/`);
-      console.log('API response data:', res.data); // Ghi log dữ liệu trả về
+      let res = await axios.get(endpoints.storeFoods(storeId));
       setFoods(res.data);
     } catch (error) {
       console.error('Error fetching store foods:', error);
     }
+  };
+
+  const handleQuantityChange = (id, change) => {
+    setQuantities((prevQuantities) => {
+      const newQuantities = { ...prevQuantities };
+      if (!newQuantities[id]) {
+        newQuantities[id] = 0;
+      }
+      newQuantities[id] += change;
+      if (newQuantities[id] < 0) {
+        newQuantities[id] = 0;
+      }
+      return newQuantities;
+    });
+  };
+
+  const truncateDescription = (description, maxLength) => {
+    if (description.length <= maxLength) {
+      return description;
+    }
+    return description.substring(0, maxLength) + '...';
+  };
+
+  const calculateTotal = () => {
+    return foods.reduce((total, item) => {
+      const quantity = quantities[item.id] || 0;
+      return total + (item.price * quantity);
+    }, 0);
   };
 
   const renderHeader = () => {
@@ -97,40 +126,85 @@ const StoreDetail = () => {
     );
   };
 
-  const renderFoods = () => {
+  const renderFoods = ({ item }) => {
     return (
-      <FlatList
-        data={foods}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={{
-              flexDirection: 'row',
-              marginBottom: SIZES.padding,
-              paddingHorizontal: SIZES.padding,
-            }}
-            onPress={() => navigation.navigate('FoodDetail', { foodId: item.id })}
-          >
-            <Image
-              source={{ uri: item.image }}
-              style={{
-                width: 100,
-                height: 100,
-                borderRadius: SIZES.radius,
-              }}
-              resizeMode="cover"
+      <TouchableOpacity
+        style={{
+          flexDirection: 'row',
+          marginBottom: SIZES.padding,
+          paddingHorizontal: SIZES.padding,
+        }}
+        onPress={() => navigation.navigate('FoodDetail', { foodId: item.id })}
+      >
+        <Image
+          source={{ uri: `https://nguyenmax007.pythonanywhere.com${item.image}` }}
+          style={{
+            width: 100,
+            height: 100,
+            borderRadius: SIZES.radius,
+          }}
+          resizeMode="cover"
+        />
+        <View style={{ flex: 1, marginLeft: SIZES.radius }}>
+          <Text style={{ ...FONTS.h3 }}>{item.name}</Text>
+          <Text style={{ ...FONTS.body4, color: COLORS.gray, marginTop: SIZES.base }}>
+            {truncateDescription(item.description, 100)}
+          </Text>
+          <Text style={{ ...FONTS.h3, marginTop: SIZES.base }}>{Math.round(item.price)} VNĐ</Text>
+          <Text style={{ ...FONTS.body4, color: COLORS.gray, marginTop: SIZES.base }}>
+            Số lượng: {quantities[item.id] || 0}
+          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: SIZES.base }}>
+            <StepperInput
+              value={quantities[item.id] || 0}
+              onAdd={() => handleQuantityChange(item.id, 1)}
+              onMinus={() => handleQuantityChange(item.id, -1)}
             />
-            <View style={{ flex: 1, marginLeft: SIZES.radius }}>
-              <Text style={{ ...FONTS.h3 }}>{item.name}</Text>
-              <Text style={{ ...FONTS.body4, color: COLORS.gray, marginTop: SIZES.base }}>
-                {item.description}
-              </Text>
-              <Text style={{ ...FONTS.h3, marginTop: SIZES.base }}>{item.price} VNĐ</Text>
-            </View>
-          </TouchableOpacity>
-        )}
-        contentContainerStyle={{ paddingBottom: SIZES.padding }}
-      />
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  const renderFooter = () => {
+    const total = calculateTotal();
+    const hasItems = Object.values(quantities).some(quantity => quantity > 0);
+
+    if (!hasItems) {
+      return null;
+    }
+
+    return (
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          flexDirection: 'row',
+          height: 120,
+          alignItems: 'center',
+          paddingHorizontal: SIZES.padding,
+          paddingBottom: SIZES.radius,
+          backgroundColor: COLORS.white,
+          borderTopWidth: 1,
+          borderTopColor: COLORS.lightGray,
+        }}>
+        <Text style={{ ...FONTS.h2, flex: 1 }}>Total: {Math.round(total)} VNĐ</Text>
+        <TextButton
+          buttonContainerStyle={{
+            flex: 1,
+            flexDirection: 'row',
+            height: 60,
+            marginLeft: SIZES.radius,
+            paddingHorizontal: SIZES.radius,
+            borderRadius: SIZES.radius,
+            backgroundColor: COLORS.primary,
+          }}
+          label="Thanh Toán"
+          onPress={() => navigation.navigate("MyCart")}
+        />
+      </View>
     );
   };
 
@@ -142,17 +216,13 @@ const StoreDetail = () => {
       }}>
       {renderHeader()}
       <FlatList
-        ListHeaderComponent={
-          <View>
-            {renderStoreInfo()}
-          </View>
-        }
-        ListFooterComponent={
-          <View>
-            {renderFoods()}
-          </View>
-        }
+        data={foods}
+        keyExtractor={(item) => item.id.toString()}
+        ListHeaderComponent={renderStoreInfo}
+        renderItem={renderFoods}
+        contentContainerStyle={{ paddingBottom: 150 }} // Ensure enough space for the footer
       />
+      {renderFooter()}
     </View>
   );
 };

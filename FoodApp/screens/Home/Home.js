@@ -6,8 +6,9 @@ import {
   Image,
   TextInput,
   FlatList,
+  ActivityIndicator, // Import ActivityIndicator
 } from 'react-native';
-import { FONTS, SIZES, COLORS, icons, dummyData } from '../../constants';
+import { FONTS, SIZES, COLORS, icons } from '../../constants';
 import { HorizontalFoodCard, VerticalFoodCard } from '../../components';
 import { useNavigation } from '@react-navigation/native';
 import axios, { endpoints } from '../../configs/APIs'; // Import axios and endpoints from APIs.js
@@ -37,12 +38,11 @@ const Section = ({ title, onPress, children }) => {
 };
 
 const Home = () => {
-  const [selectedCategoryId, setSelectedCategoryId] = React.useState(1);
-  const [selectedMenuType, setSelectedMenuType] = React.useState(1);
   const [recommended, setRecommended] = React.useState([]);
   const [popular, setPopular] = React.useState([]);
   const [menuList, setMenuList] = React.useState([]);
   const [showFilterModel, setShowFilterModel] = React.useState(false);
+  const [loading, setLoading] = React.useState(true); // State to track loading
 
   const navigation = useNavigation();
 
@@ -57,6 +57,8 @@ const Home = () => {
       setPopular(res.data);
     } catch (error) {
       console.error('Error fetching popular foods:', error);
+    } finally {
+      setLoading(false); // Set loading to false after data is fetched
     }
   };
 
@@ -66,6 +68,8 @@ const Home = () => {
       setRecommended(res.data);
     } catch (error) {
       console.error('Error fetching stores:', error);
+    } finally {
+      setLoading(false); // Set loading to false after data is fetched
     }
   };
 
@@ -103,7 +107,7 @@ const Home = () => {
           paddingHorizontal: SIZES.radius,
           borderRadius: SIZES.radius,
           backgroundColor: COLORS.lightGray2,
-          marginTop: 10, // Thêm khoảng cách 10px từ đỉnh màn hình
+          marginTop: 50,
         }}>
         {/* menu icon */}
         <TouchableOpacity
@@ -161,7 +165,7 @@ const Home = () => {
                 marginRight: index == popular.length - 1 ? SIZES.padding : 0,
               }}
               item={item}
-              onPress={() => navigation.navigate("StoreDetail", { storeId: item.storeId })}
+              onPress={() => navigation.navigate("StoreDetail", { storeId: item.store })}
             />
           )}
         />
@@ -220,6 +224,13 @@ const Home = () => {
     );
   }
 
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
 
   return (
     <View
@@ -239,7 +250,6 @@ const Home = () => {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View>
-
             {/* Popular */}
             {renderPopular()}
             {/* recommended */}

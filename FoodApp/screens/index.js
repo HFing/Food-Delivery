@@ -37,6 +37,10 @@ import MyCard from "./Card/MyCard"
 import DeliveryStatus from "./Delivery/DeliveryStatus"
 import Map from "./Delivery/Map"
 
+// Food
+import FoodDetail from "./Food/FoodDetail"
+
+
 export {
     MainLayout,
     Home,
@@ -45,6 +49,7 @@ export {
     Favourite,
     Notification,
     StoreDetail,
+    FoodDetail,
     Checkout,
     MyCart,
     Success,

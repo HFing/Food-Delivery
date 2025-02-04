@@ -1,9 +1,16 @@
 import axios from "axios";
 
 const BASE_URL = 'https://nguyenmax007.pythonanywhere.com';
+
 export const endpoints = {
     popularFoods: '/foods/random-foods/',
-    stores: '/stores/'
+    stores: '/stores/',
+    storeDetails: (storeId) => `/stores/${storeId}/`,
+    storeFoods: (storeId) => `/stores/${storeId}/foods/`,
+    foodDetails: (foodId) => `/foods/${foodId}/`,
+    register: '/users/',
+    login: '/o/token/',
+    'current-user': '/users/current-user/'
 };
 
 export const authApis = (token) => {

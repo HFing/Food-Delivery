@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   View,
   Text,
@@ -8,14 +8,32 @@ import {
   SafeAreaView
 } from 'react-native';
 import { createDrawerNavigator, DrawerContentScrollView } from '@react-navigation/drawer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Home from '../screens/Home/Home';
 import OnBoarding from '../screens/OnBoarding/OnBoarding';
 import Profile from '../screens/User/Profile';
+import { MyUserContext, MyDispatchContext } from '../configs/MyUserContext'; // Import MyUserContext và MyDispatchContext
+import { BASE_URL } from '../configs/APIs'; // Import BASE_URL
 
 const Drawer = createDrawerNavigator();
 
 const CustomDrawerContent = (props) => {
   const { navigation } = props;
+  const user = useContext(MyUserContext);
+  const dispatch = useContext(MyDispatchContext);
+
+  console.log("User Context:", user);
+
+  const avatarUrl = 'https://nguyenmax007.pythonanywhere.com' + `${user.avatar}`;
+
+
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('token');
+    await AsyncStorage.removeItem('user');
+    dispatch({ type: 'logout' });
+    navigation.replace('SignIn');
+  };
+
   return (
     <DrawerContentScrollView {...props}>
       <SafeAreaView style={styles.drawerContent}>
@@ -25,9 +43,9 @@ const CustomDrawerContent = (props) => {
         </TouchableOpacity>
         {/* User Profile Section */}
         <TouchableOpacity style={styles.profileSection} onPress={() => navigation.navigate('Profile')}>
-          <Image source={{ uri: 'https://via.placeholder.com/50' }} style={styles.profileImage} />
+          <Image source={{ uri: avatarUrl }} style={styles.profileImage} />
           <View>
-            <Text style={styles.profileName}>John Snow</Text>
+            <Text style={styles.profileName}>{user?.username || 'Guest'}</Text>
             <Text style={styles.profileText}>View Your Profile</Text>
           </View>
         </TouchableOpacity>
@@ -37,12 +55,6 @@ const CustomDrawerContent = (props) => {
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem}>
           <Text style={styles.drawerText}>My Wallet</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem}>
-          <Text style={styles.drawerText}>VOICE COMMAND</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem} onPress={() => navigation.navigate('OnBoarding')}>
-          <Text style={styles.drawerText}>Sign-In</Text>
         </TouchableOpacity>
         <View style={styles.separator} />
         <TouchableOpacity style={styles.drawerItem}>
@@ -61,7 +73,7 @@ const CustomDrawerContent = (props) => {
           <Text style={styles.drawerText}>Help Center</Text>
         </TouchableOpacity>
         <View style={styles.separator} />
-        <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.navigate('OnBoarding')}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       </SafeAreaView>
