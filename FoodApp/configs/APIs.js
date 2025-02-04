@@ -1,7 +1,11 @@
 import axios from "axios";
 
-const BASE_URL = 'nguyenmax007.pythonanywhere.com';
-export const endpoints = {}
+const BASE_URL = 'https://nguyenmax007.pythonanywhere.com';
+export const endpoints = {
+    popularFoods: '/foods/random-foods/',
+    stores: '/stores/'
+};
+
 export const authApis = (token) => {
     console.info("TEST")
     console.info(token);

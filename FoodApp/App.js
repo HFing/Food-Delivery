@@ -8,7 +8,7 @@ import rootReducer from "./stores/rootReducer";
 import CustomDrawer from "./navigation/CustomDrawer";
 
 import {
-  FoodDetail,
+  StoreDetail, // Import StoreDetail
   Checkout,
   MyCard,
   MyCart,
@@ -43,7 +43,7 @@ const App = () => {
         >
           {/* Chỉ hiển thị màn hình Home */}
           <Stack.Screen name="Home" component={CustomDrawer} />
-          <Stack.Screen name="FoodDetail" component={FoodDetail} />
+          <Stack.Screen name="StoreDetail" component={StoreDetail} />
           <Stack.Screen name="Checkout" component={Checkout} />
           <Stack.Screen name="MyCart" component={MyCart} />
           <Stack.Screen name="Success" component={Success} options={{ gestureEnabled: false }} />

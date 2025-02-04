@@ -10,6 +10,7 @@ import {
 import { FONTS, SIZES, COLORS, icons, dummyData } from '../../constants';
 import { HorizontalFoodCard, VerticalFoodCard } from '../../components';
 import { useNavigation } from '@react-navigation/native';
+import axios, { endpoints } from '../../configs/APIs'; // Import axios and endpoints from APIs.js
 
 import FilterModel from './FilterModel';
 
@@ -46,28 +47,23 @@ const Home = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    fetchPopularFoods();
-
+    loadPopularFoods();
+    loadStores();
   }, []);
 
-  const fetchPopularFoods = async () => {
+  const loadPopularFoods = async () => {
     try {
-      const response = await fetch('https://nguyenmax007.pythonanywhere.com/foods/random-foods/');
-      const data = await response.json();
-      setPopular(data);
+      let res = await axios.get(endpoints.popularFoods);
+      setPopular(res.data);
     } catch (error) {
       console.error('Error fetching popular foods:', error);
     }
   };
 
-  useEffect(() => {
-    fetchStores();
-  }, []);
-  const fetchStores = async () => {
+  const loadStores = async () => {
     try {
-      const response = await fetch('https://nguyenmax007.pythonanywhere.com/stores/'); // Replace with actual API endpoint
-      const data = await response.json();
-      setRecommended(data); // Update recommended state with store data
+      let res = await axios.get(endpoints.stores);
+      setRecommended(res.data);
     } catch (error) {
       console.error('Error fetching stores:', error);
     }
@@ -149,8 +145,6 @@ const Home = () => {
     );
   }
 
-
-
   function renderPopular() {
     return (
       <Section title="Hot Food Near You" onPress={() => console.log('show all')}>
@@ -167,7 +161,7 @@ const Home = () => {
                 marginRight: index == popular.length - 1 ? SIZES.padding : 0,
               }}
               item={item}
-              onPress={() => navigation.navigate("FoodDetail", { item })}
+              onPress={() => navigation.navigate("StoreDetail", { storeId: item.storeId })}
             />
           )}
         />
@@ -179,40 +173,46 @@ const Home = () => {
     return (
       <Section title="Stores Near You" onPress={() => console.log('Show all stores')}>
         <FlatList
-          data={recommended} // Store data
+          data={recommended}
           keyExtractor={(item) => item.id.toString()}
           horizontal
           showsHorizontalScrollIndicator={false}
           renderItem={({ item, index }) => (
             <TouchableOpacity
               style={{
-                height: 180,
-                width: SIZES.width * 0.85,
+                height: 200,
+                width: SIZES.width * 0.9,
                 marginLeft: index === 0 ? SIZES.padding : 18,
                 marginRight: index === recommended.length - 1 ? SIZES.padding : 0,
-                paddingRight: SIZES.radius,
+                padding: 15,
                 alignItems: 'center',
                 backgroundColor: COLORS.white,
-                borderRadius: SIZES.radius,
+                borderRadius: 15,
                 shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
+                shadowOffset: { width: 0, height: 3 },
                 shadowOpacity: 0.2,
-                shadowRadius: 4,
-                elevation: 5,
+                shadowRadius: 5,
+                elevation: 6,
               }}
-              onPress={() => navigation.navigate('StoreDetail', { item })} // Navigate to store details
+              onPress={() => navigation.navigate('StoreDetail', { storeId: item.id })}
             >
+              {/* Hình ảnh của cửa hàng */}
               <Image
-                source={{ uri: item.image }}
+                source={{ uri: `https://nguyenmax007.pythonanywhere.com${item.owner_avatar}` }}
                 style={{
-                  marginTop: 15,
-                  height: 120,
-                  width: 120,
-                  borderRadius: SIZES.radius,
+                  width: 100,
+                  height: 100,
+                  borderRadius: 10,
+                  marginBottom: 10,
                 }}
+                resizeMode="cover"
               />
-              <Text style={{ ...FONTS.h3, marginTop: 5 }}>{item.name}</Text>
-              <Text style={{ ...FONTS.body4, color: COLORS.gray }}>{item.location}</Text>
+              {/* Tên cửa hàng */}
+              <Text style={{ ...FONTS.h3, fontWeight: 'bold', marginBottom: 3 }}>{item.name}</Text>
+              {/* Đánh giá và khoảng cách */}
+              <Text style={{ ...FONTS.body4, color: COLORS.gray }}>
+                ⭐ {item.rating || '4.5'} · {item.distance || '1.2km'}
+              </Text>
             </TouchableOpacity>
           )}
         />
@@ -220,24 +220,6 @@ const Home = () => {
     );
   }
 
-
-
-  function renderDelivaryTo() {
-    return (
-      <View style={{ marginTop: SIZES.padding, marginHorizontal: SIZES.padding }}>
-        <Text style={{ color: COLORS.primary, ...FONTS.body3 }}> DEIVERY TO</Text>
-        <TouchableOpacity
-          style={{
-            flexDirection: 'row',
-            marginTop: SIZES.base,
-            alignItems: 'center',
-          }}>
-          <Text style={{ ...FONTS.h3 }}>{dummyData?.myProfile?.address}</Text>
-          <Image style={{ marginLeft: SIZES.base, height: 20, width: 20 }} source={icons.down_arrow} />
-        </TouchableOpacity>
-      </View>
-    );
-  }
 
   return (
     <View
@@ -257,13 +239,11 @@ const Home = () => {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View>
-            {/* Delivary to */}
-            {renderDelivaryTo()}
+
             {/* Popular */}
             {renderPopular()}
             {/* recommended */}
             {renderRecommendedSection()}
-
           </View>
         }
         renderItem={({ item, index }) => {
@@ -281,7 +261,7 @@ const Home = () => {
                 width: 110,
               }}
               item={item}
-              onPress={() => console.log('ok')}
+              onPress={() => navigation.navigate("StoreDetail", { storeId: item.storeId })}
             />
           );
         }}

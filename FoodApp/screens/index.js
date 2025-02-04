@@ -21,8 +21,8 @@ import Favourite from "./Favourite/Favourite";
 
 // Notification
 import Notification from "./Notification/Notification"
-// Food
-import FoodDetail from "./Food/FoodDetail"
+// Store
+import StoreDetail from "./Store/StoreDetail"
 
 // Cart
 import Checkout from "./Cart/Checkout"
@@ -36,6 +36,7 @@ import MyCard from "./Card/MyCard"
 // Delivery
 import DeliveryStatus from "./Delivery/DeliveryStatus"
 import Map from "./Delivery/Map"
+
 export {
     MainLayout,
     Home,
@@ -43,15 +44,12 @@ export {
     CartTab,
     Favourite,
     Notification,
-    FoodDetail,
-
+    StoreDetail,
     Checkout,
     MyCart,
     Success,
-
     AddCard,
     MyCard,
-
     DeliveryStatus,
     Map,
     OnBoarding,

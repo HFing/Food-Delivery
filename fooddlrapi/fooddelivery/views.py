@@ -35,14 +35,13 @@ class StoreViewSet(viewsets.ModelViewSet):
     queryset = Store.objects.filter(is_active=True)
     serializer_class = serializers.StoreSerializer
 
-
     @action(methods=['get'], detail=False, url_path='list', permission_classes=[permissions.AllowAny])
     def get_stores(self, request):
         stores = self.paginate_queryset(self.get_queryset())  # Sử dụng pagination
         serializer = self.get_serializer(stores, many=True)
         return self.get_paginated_response(serializer.data)
 
-    @action(methods=['get'], detail=True, url_path='foods', permission_classes=[permissions.IsAuthenticated])
+    @action(methods=['get'], detail=True, url_path='foods', permission_classes=[permissions.AllowAny])
     def get_foods(self, request, pk=None):
         store = self.get_object()
         foods = Food.objects.filter(store=store).select_related('menu')
@@ -54,7 +53,7 @@ class StoreViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(methods=['get'], detail=True, url_path='menus/(?P<menu_id>[^/.]+)/foods',
-            permission_classes=[permissions.IsAuthenticated])
+            permission_classes=[permissions.AllowAny])
     def get_menu_foods(self, request, pk=None, menu_id=None):
         store = self.get_object()
         time_slot = request.query_params.get('time_slot', 'morning')
@@ -77,7 +76,7 @@ class FoodViewSet(viewsets.ModelViewSet):
     queryset = Food.objects.all()
     serializer_class = serializers.FoodSerializer
 
-    @action(methods=['get'], detail=False, url_path='search', permission_classes=[permissions.IsAuthenticated])
+    @action(methods=['get'], detail=False, url_path='search', permission_classes=[permissions.AllowAny])
     def search_foods(self, request):
         name = request.query_params.get('name', None)
         price = request.query_params.get('price', None)
