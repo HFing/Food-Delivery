@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -21,7 +21,7 @@ const Section = ({ title, onPress, children }) => {
         style={{
           flexDirection: 'row',
           marginHorizontal: SIZES.padding,
-          marginTop: 20,
+          marginTop: 30,
           marginBottom: 20,
         }}>
         <Text style={{ flex: 1, ...FONTS.h3 }}>{title}</Text>
@@ -45,9 +45,33 @@ const Home = () => {
 
   const navigation = useNavigation();
 
-  React.useEffect(() => {
-    return handleChangeCategory(selectedCategoryId, selectedMenuType);
+  useEffect(() => {
+    fetchPopularFoods();
+
   }, []);
+
+  const fetchPopularFoods = async () => {
+    try {
+      const response = await fetch('https://nguyenmax007.pythonanywhere.com/foods/random-foods/');
+      const data = await response.json();
+      setPopular(data);
+    } catch (error) {
+      console.error('Error fetching popular foods:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchStores();
+  }, []);
+  const fetchStores = async () => {
+    try {
+      const response = await fetch('https://nguyenmax007.pythonanywhere.com/stores/'); // Replace with actual API endpoint
+      const data = await response.json();
+      setRecommended(data); // Update recommended state with store data
+    } catch (error) {
+      console.error('Error fetching stores:', error);
+    }
+  };
 
   const handleChangeCategory = (categotyId, menuTypeId) => {
     //   Retrive the popular
@@ -83,7 +107,7 @@ const Home = () => {
           paddingHorizontal: SIZES.radius,
           borderRadius: SIZES.radius,
           backgroundColor: COLORS.lightGray2,
-          marginTop: 50, // Thêm khoảng cách 10px từ đỉnh màn hình
+          marginTop: 10, // Thêm khoảng cách 10px từ đỉnh màn hình
         }}>
         {/* menu icon */}
         <TouchableOpacity
@@ -125,50 +149,16 @@ const Home = () => {
     );
   }
 
-  function renderMenuType() {
-    return (
-      <FlatList
-        horizontal
-        data={dummyData.menu}
-        keyExtractor={(item) => item.id}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{
-          marginTop: 30,
-          marginBottom: 20,
-        }}
-        renderItem={({ item, index }) => (
-          <TouchableOpacity
-            style={{
-              marginLeft: SIZES.padding,
-              marginRight:
-                index == dummyData.menu.length - 1 ? SIZES.padding : 0,
-            }}
-            onPress={() => {
-              setSelectedMenuType(item.id);
-              handleChangeCategory(selectedCategoryId, item.id);
-            }}>
-            <Text
-              style={{
-                color:
-                  selectedMenuType == item.id ? COLORS.primary : COLORS.black,
-                ...FONTS.h3,
-              }}>
-              {item.name}
-            </Text>
-          </TouchableOpacity>
-        )}
-      />
-    );
-  }
+
 
   function renderPopular() {
     return (
-      <Section title="Popular Near You" onPress={() => console.log('show all')}>
+      <Section title="Hot Food Near You" onPress={() => console.log('show all')}>
         <FlatList
           data={popular}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           horizontal
-          showsHorizontalScrollIndicat={false}
+          showsHorizontalScrollIndicator={false}
           renderItem={({ item, index }) => (
             <VerticalFoodCard
               containerStyle={{
@@ -177,7 +167,7 @@ const Home = () => {
                 marginRight: index == popular.length - 1 ? SIZES.padding : 0,
               }}
               item={item}
-              onPress={() => navigation.navigate("FoodDetail")}
+              onPress={() => navigation.navigate("FoodDetail", { item })}
             />
           )}
         />
@@ -187,84 +177,50 @@ const Home = () => {
 
   function renderRecommendedSection() {
     return (
-      <Section title="Recommonded" onPress={() => console.log('recommended')}>
+      <Section title="Stores Near You" onPress={() => console.log('Show all stores')}>
         <FlatList
-          data={recommended}
-          keyExtractor={(item) => item.id}
+          data={recommended} // Store data
+          keyExtractor={(item) => item.id.toString()}
           horizontal
           showsHorizontalScrollIndicator={false}
           renderItem={({ item, index }) => (
-            <HorizontalFoodCard
-              containerStyle={{
+            <TouchableOpacity
+              style={{
                 height: 180,
                 width: SIZES.width * 0.85,
-                marginLeft: index == 0 ? SIZES.padding : 18,
-                marginRight:
-                  index == recommended.length - 1 ? SIZES.padding : 0,
+                marginLeft: index === 0 ? SIZES.padding : 18,
+                marginRight: index === recommended.length - 1 ? SIZES.padding : 0,
                 paddingRight: SIZES.radius,
                 alignItems: 'center',
+                backgroundColor: COLORS.white,
+                borderRadius: SIZES.radius,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.2,
+                shadowRadius: 4,
+                elevation: 5,
               }}
-              imageStyle={{
-                marginTop: 35,
-                height: 150,
-                width: 150,
-              }}
-              item={item}
-              onPress={() => console.log('hor recommended')}
-            />
+              onPress={() => navigation.navigate('StoreDetail', { item })} // Navigate to store details
+            >
+              <Image
+                source={{ uri: item.image }}
+                style={{
+                  marginTop: 15,
+                  height: 120,
+                  width: 120,
+                  borderRadius: SIZES.radius,
+                }}
+              />
+              <Text style={{ ...FONTS.h3, marginTop: 5 }}>{item.name}</Text>
+              <Text style={{ ...FONTS.body4, color: COLORS.gray }}>{item.location}</Text>
+            </TouchableOpacity>
           )}
         />
       </Section>
     );
   }
 
-  function renderFoodCategories() {
-    return (
-      <FlatList
-        data={dummyData.categories}
-        keyExtractor={(item) => item.id}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        renderItem={({ item, index }) => (
-          <TouchableOpacity
-            style={{
-              flexDirection: 'row',
-              height: 55,
-              marginTop: SIZES.padding,
-              marginLeft: index == 0 ? SIZES.padding : SIZES.radius,
-              marginRight: index == 0 ? SIZES.padding : SIZES.radius,
-              backgroundColor:
-                selectedCategoryId == item.id
-                  ? COLORS.primary
-                  : COLORS.lightGray2,
-              paddingHorizontal: 8,
-              borderRadius: SIZES.radius,
-            }}
-            onPress={() => {
-              setSelectedCategoryId(item.id);
-              handleChangeCategory(item.id, selectedMenuType);
-            }}>
-            <Image
-              source={item.icon}
-              style={{ marginTop: 5, height: 50, width: 50 }}
-            />
-            <Text
-              style={{
-                alignSelf: 'center',
-                marginRight: SIZES.base,
-                color:
-                  selectedCategoryId == item.id
-                    ? COLORS.white
-                    : COLORS.darkGray,
-                ...FONTS.h3,
-              }}>
-              {item.name}
-            </Text>
-          </TouchableOpacity>
-        )}
-      />
-    );
-  }
+
 
   function renderDelivaryTo() {
     return (
@@ -303,14 +259,11 @@ const Home = () => {
           <View>
             {/* Delivary to */}
             {renderDelivaryTo()}
-            {/* Food category */}
-            {renderFoodCategories()}
             {/* Popular */}
             {renderPopular()}
             {/* recommended */}
             {renderRecommendedSection()}
-            {/* Menu tupe */}
-            {renderMenuType()}
+
           </View>
         }
         renderItem={({ item, index }) => {

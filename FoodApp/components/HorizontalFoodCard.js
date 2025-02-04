@@ -1,38 +1,55 @@
 import React from 'react';
-import {View, TouchableOpacity, Image, Text} from 'react-native';
-import {FONTS, COLORS, SIZES, icons} from '../constants';
+import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { FONTS, SIZES, COLORS } from '../constants';
 
-export default function HorizontalFoodCard({
-  containerStyle,
-  imageStyle,
-  item,
-  onPress,
-}) {
+const HorizontalFoodCard = ({ containerStyle, imageStyle, item, onPress }) => {
   return (
-    <TouchableOpacity
-      style={{
-        flexDirection: 'row',
-        borderRadius: SIZES.radius,
-        backgroundColor: COLORS.lightGray2,
-        ...containerStyle,
-      }}>
-      {/* image */}
-      <Image source={item.image} style={imageStyle} />
-      {/* Info */}
-      <View style={{flex:1}}>
-        {/* name */}
-        <Text style={{...FONTS.h3,fontSize:17}}>{item.name}</Text>
-        {/* description */}
-        <Text style={{color:COLORS.darkGray2,...FONTS.body4}}>{item.description}</Text>
-        {/* price */}
-        <Text style={{marginTop:SIZES.base,...FONTS.h2,}}>${item.price}</Text>
-
-      </View>
-      {/* Colories */}
-      <View style={{flexDirection:'row',position:'absolute',top:10,right:SIZES.radius}}>
-      <Image source={icons.calories} style={{width:30,height:30}}/>
-      <Text style={{color:COLORS.darkGray2,...FONTS.body5}}>{item.calories} Calories</Text>
+    <TouchableOpacity style={{ ...styles.card, ...containerStyle }} onPress={onPress}>
+      <Image source={{ uri: item.image }} style={{ ...styles.image, ...imageStyle }} />
+      <View style={styles.info}>
+        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
+        <Text style={styles.price}>{parseInt(item.price)} VNĐ</Text>
       </View>
     </TouchableOpacity>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  card: {
+    flexDirection: 'row',
+    borderRadius: SIZES.radius,
+    backgroundColor: COLORS.white,
+    shadowColor: COLORS.black,
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 5,
+    marginBottom: SIZES.padding,
+  },
+  image: {
+    width: 100,
+    height: 100,
+    borderTopLeftRadius: SIZES.radius,
+    borderBottomLeftRadius: SIZES.radius,
+  },
+  info: {
+    flex: 1,
+    padding: SIZES.padding,
+  },
+  name: {
+    ...FONTS.h3,
+    color: COLORS.black,
+  },
+  description: {
+    ...FONTS.body4,
+    color: COLORS.darkGray,
+    marginVertical: SIZES.base,
+  },
+  price: {
+    ...FONTS.h3,
+    color: COLORS.primary,
+  },
+});
+
+export default HorizontalFoodCard;

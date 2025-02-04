@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = 'https://thanhduong.pythonanywhere.com/';
+const BASE_URL = 'nguyenmax007.pythonanywhere.com';
 export const endpoints = {}
 export const authApis = (token) => {
     console.info("TEST")

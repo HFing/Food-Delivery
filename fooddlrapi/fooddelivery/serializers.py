@@ -22,9 +22,14 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
 class StoreSerializer(serializers.ModelSerializer):
+    owner_avatar = serializers.SerializerMethodField()
+
     class Meta:
         model = Store
         fields = '__all__'
+
+    def get_owner_avatar(self, obj):
+        return obj.owner.avatar.url if obj.owner.avatar else ''
 
 class MenuSerializer(serializers.ModelSerializer):
     class Meta:

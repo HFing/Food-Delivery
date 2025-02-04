@@ -35,16 +35,21 @@ class StoreViewSet(viewsets.ModelViewSet):
     queryset = Store.objects.filter(is_active=True)
     serializer_class = serializers.StoreSerializer
 
+
     @action(methods=['get'], detail=False, url_path='list', permission_classes=[permissions.AllowAny])
     def get_stores(self, request):
-        stores = Store.objects.filter(is_active=True)
+        stores = self.paginate_queryset(self.get_queryset())  # Sử dụng pagination
         serializer = self.get_serializer(stores, many=True)
-        return Response(serializer.data)
+        return self.get_paginated_response(serializer.data)
 
     @action(methods=['get'], detail=True, url_path='foods', permission_classes=[permissions.IsAuthenticated])
     def get_foods(self, request, pk=None):
         store = self.get_object()
-        foods = Food.objects.filter(store=store)
+        foods = Food.objects.filter(store=store).select_related('menu')
+
+        if not foods.exists():
+            return Response({"detail": "Cửa hàng này không có món ăn nào."}, status=status.HTTP_404_NOT_FOUND)
+
         serializer = serializers.FoodSerializer(foods, many=True)
         return Response(serializer.data)
 
@@ -52,9 +57,17 @@ class StoreViewSet(viewsets.ModelViewSet):
             permission_classes=[permissions.IsAuthenticated])
     def get_menu_foods(self, request, pk=None, menu_id=None):
         store = self.get_object()
-        foods = Food.objects.filter(store=store, menu_id=menu_id)
+        time_slot = request.query_params.get('time_slot', 'morning')
+        foods = Food.objects.filter(store=store, menu_id=menu_id, menu__time_slot=time_slot)
+
+        if not foods.exists():
+            return Response({"detail": "Menu này không có món ăn nào."}, status=status.HTTP_404_NOT_FOUND)
+
         serializer = serializers.FoodSerializer(foods, many=True)
         return Response(serializer.data)
+
+    
+
 
 class MenuViewSet(viewsets.ModelViewSet):
     queryset = Menu.objects.all()
