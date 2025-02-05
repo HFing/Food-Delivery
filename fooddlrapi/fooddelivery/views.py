@@ -30,6 +30,15 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     def get_user(self, request):
         return Response(serializers.UserSerializer(request.user).data)
 
+    @action(methods=['put'], url_path='update', detail=False, permission_classes=[permissions.IsAuthenticated])
+    def update_user(self, request):
+        user = request.user
+        serializer = serializers.UserSerializer(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    
 
 class StoreViewSet(viewsets.ModelViewSet):
     queryset = Store.objects.filter(is_active=True)

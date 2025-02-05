@@ -1,18 +1,56 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import {
     View,
     Text,
     TouchableOpacity,
     StyleSheet,
     Image,
-    SafeAreaView
+    SafeAreaView,
+    Alert
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { launchImageLibrary } from 'react-native-image-picker';
 import { icons, COLORS, SIZES } from '../../constants';
 import { IconButton } from '../../components';
+import { MyUserContext, MyDispatchContext } from '../../configs/MyUserContext';
+import { BASE_URL, authApis, endpoints } from '../../configs/APIs';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileScreen = () => {
     const navigation = useNavigation();
+    const user = useContext(MyUserContext);
+    const dispatch = useContext(MyDispatchContext);
+
+    const [avatar, setAvatar] = useState('https://nguyenmax007.pythonanywhere.com' + `${user.avatar}`);
+
+    const handleChooseAvatar = () => {
+        launchImageLibrary({ noData: true }, (response) => {
+            if (response.assets) {
+                setAvatar(response.assets[0].uri);
+                handleSaveAvatar(response.assets[0].uri);
+            }
+        });
+    };
+
+    const handleSaveAvatar = async (newAvatar) => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const formData = new FormData();
+            formData.append('avatar', {
+                uri: newAvatar,
+                type: 'image/jpeg',
+                name: 'avatar.jpg'
+            });
+
+            const res = await authApis(token).put(endpoints['current-user'], formData);
+            dispatch({ type: 'update', payload: res.data });
+            Alert.alert('Success', 'Avatar updated successfully');
+        } catch (error) {
+            console.error(error);
+            Alert.alert('Error', 'Failed to update avatar');
+        }
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             {/* Header */}
@@ -42,20 +80,19 @@ const ProfileScreen = () => {
             </View>
             {/* Profile Info */}
             <View style={styles.profileSection}>
-                <Image source={{ uri: 'https://via.placeholder.com/100' }} style={styles.profileImage} />
-                <Text style={styles.profileName}>John Snow</Text>
-                <Text style={styles.profileBio}>A passionate software developer.</Text>
+                <TouchableOpacity onPress={handleChooseAvatar}>
+                    <Image source={{ uri: avatar }} style={styles.profileImage} />
+                </TouchableOpacity>
+                <Text style={styles.profileName}>{`${user?.first_name || ''} ${user?.last_name || ''}`}</Text>
+                <Text style={styles.profileBio}>{user?.email || ''}</Text>
             </View>
             {/* Profile Details */}
             <View style={styles.detailSection}>
                 <Text style={styles.detailTitle}>Email</Text>
-                <Text style={styles.detailText}>john.snow@example.com</Text>
+                <Text style={styles.detailText}>{user?.email || ''}</Text>
 
-                <Text style={styles.detailTitle}>Phone</Text>
-                <Text style={styles.detailText}>+123 456 7890</Text>
-
-                <Text style={styles.detailTitle}>Location</Text>
-                <Text style={styles.detailText}>Winterfell, Westeros</Text>
+                <Text style={styles.detailTitle}>Username</Text>
+                <Text style={styles.detailText}>{user?.username || ''}</Text>
             </View>
             {/* Logout Button */}
             <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.navigate('OnBoarding')}>

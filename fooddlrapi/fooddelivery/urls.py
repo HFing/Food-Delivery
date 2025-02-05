@@ -11,6 +11,7 @@ routers.register(r'menus', views.MenuViewSet, basename='menu')
 routers.register(r'foods', views.FoodViewSet, basename='food')
 
 
+
 urlpatterns = [
     path('', include(routers.urls)),
     path('store/', store_dashboard, name='store/store_dashboard'),
