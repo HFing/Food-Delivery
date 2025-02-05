@@ -153,20 +153,7 @@ const SignIn = ({ navigation }) => {
           </View>
           {/* Footer */}
           <View style={{ marginBottom: SIZES.radius }}>
-            {/* Facebook */}
-            <TextIconbutton2
-              containerStyle={{
-                height: 50,
-                alignItems: "center",
-                borderRadius: SIZES.radius,
-                backgroundColor: COLORS.blue,
-              }}
-              icon={icons.fb}
-              iconPosition="LEFT"
-              iconStyle={{ tintColor: COLORS.white }}
-              labelStyle={{ marginLeft: SIZES.radius, color: COLORS.white }}
-              label="Continue With Facebook"
-            />
+
             {/* Google */}
             <TextIconbutton2
               containerStyle={{

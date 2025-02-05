@@ -10,7 +10,10 @@ export const endpoints = {
     foodDetails: (foodId) => `/foods/${foodId}/`,
     register: '/users/',
     login: '/o/token/',
-    'current-user': '/users/current-user/'
+    updateUser: '/users/update/',
+    'current-user': '/users/current-user/',
+    menuDetails: (menuId) => `/menus/${menuId}/`,
+
 };
 
 export const authApis = (token) => {

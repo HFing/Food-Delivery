@@ -58,7 +58,7 @@ const App = () => {
               screenOptions={{
                 headerShown: false,
               }}
-              initialRouteName={user ? "Home" : "OnBoarding"} // Chuyển hướng đến Home nếu người dùng đã đăng nhập
+              initialRouteName={user ? "Home" : "OnBoarding"}
             >
               <Stack.Screen name="OnBoarding" component={OnBoarding} />
               <Stack.Screen name="SignIn" component={SignIn} />
@@ -84,3 +84,5 @@ const App = () => {
 };
 
 export default App;
+
+

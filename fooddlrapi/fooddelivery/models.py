@@ -83,7 +83,7 @@ class Order(Base):
     menu_items = models.ManyToManyField(Menu, through='OrderItem')
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=50, choices=PAYMENT_CHOICES)
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')  # Add this line
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
 

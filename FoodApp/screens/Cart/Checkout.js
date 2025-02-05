@@ -1,186 +1,146 @@
-import React from 'react';
-import {
-    View,
-    Text,
-    Image
-} from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { COLORS, FONTS, SIZES, icons, dummyData } from '../../constants'
-import { Header2, IconButton, CardItem, FooterTotal, FontInput2 } from '../../components';
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, TextInput, Image, ScrollView } from "react-native";
+import { COLORS, FONTS, SIZES, icons } from "../../constants";
+import TextButton from "../../components/TextButton";
 
+const Checkout = ({ route, navigation }) => {
+    const { store, quantities, total } = route.params;
+    const [selectedPayment, setSelectedPayment] = useState(null);
 
-const Checkout = ({ navigation, route }) => {
+    const renderSelectedFoods = () => {
+        return Object.keys(quantities).map((foodId) => {
+            const food = store.foods.find((item) => item.id === parseInt(foodId));
+            if (!food) return null;
 
-    const [selectedCard, setSelectedCard] = React.useState(null);
+            return (
+                <View key={food.id} style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: SIZES.base }}>
+                    <Text style={{ ...FONTS.body3 }}>{food.name} x {quantities[food.id]}</Text>
+                    <Text style={{ ...FONTS.body3 }}>{food.price * quantities[food.id]} VNĐ</Text>
+                </View>
+            );
+        });
+    };
 
-    React.useEffect(() => {
-        let { selectedCard } = route.params
-        setSelectedCard(selectedCard)
-    }, [])
+    const handleConfirmOrder = () => {
+        if (selectedPayment === "cod") {
+            navigation.replace("Success");
+        } else {
+            alert("Vui lòng chọn phương thức thanh toán!");
+        }
+    };
 
-    const renderHeader = () => {
-        return (
-            <Header2
-                title="CHECKOUT"
-                containerStyle={{
-                    height: 50,
-                    marginHorizontal: SIZES.padding,
-                    marginTop: 40,
-                }}
-                leftComponent={
-                    <IconButton
-                        icon={icons.back}
-                        containerStyle={{
-                            width: 40,
-                            height: 40,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            borderWidth: 1,
-                            borderRadius: SIZES.radius,
-                            borderColor: COLORS.gray2,
-                        }}
-                        iconStyle={{
+    return (
+        <ScrollView style={{ flex: 1, padding: SIZES.padding, backgroundColor: COLORS.white }}>
+            {/* Header */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: SIZES.padding }}>
+                <TouchableOpacity
+                    style={{
+                        width: 40,
+                        height: 40,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        borderWidth: 1,
+                        borderRadius: SIZES.radius,
+                        borderColor: COLORS.gray2,
+                        marginRight: SIZES.padding,
+                    }}
+                    onPress={() => navigation.goBack()}
+                >
+                    <Image
+                        source={icons.back}
+                        style={{
                             width: 20,
                             height: 20,
                             tintColor: COLORS.gray2,
                         }}
-                        onPress={() => navigation.goBack()}
                     />
-                }
-                rightComponent={<View style={{ width: 40 }} />}
-            />
-        );
-    };
-
-    const renderMyCards = () => {
-        return (
-            <View>
-                {selectedCard && dummyData.myCards.map((item, index) => {
-                    return (
-                        <CardItem
-                            key={`Mycard-${item.id}`}
-                            item={item}
-                            isSelected={`${selectedCard?.key}-${selectedCard?.id}` == `MyCard-${item.id}`}
-                            onPress={() => setSelectedCard({ ...item, key: "MyCard" })}
-                        />
-                    )
-                })}
+                </TouchableOpacity>
+                <Text style={{ ...FONTS.h2, textAlign: "center", flex: 1 }}>Thanh toán</Text>
+                <View style={{ width: 40 }} /> {/* Placeholder for alignment */}
             </View>
-        )
-    }
 
-    const renderDelivaryAddress = () => {
-        return (
-            <View style={{
-                marginTop: SIZES.padding
-            }}>
-                <Text style={{
-                    ...FONTS.h3
-                }}>Delivary Address</Text>
+            {/* Payment Methods */}
+            <View style={{ marginBottom: SIZES.padding }}>
+                <Text style={{ ...FONTS.h3, marginBottom: SIZES.base }}>Phương thức thanh toán</Text>
 
-                <View style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginTop: SIZES.radius,
-                    paddingVertical: SIZES.radius,
-                    paddingHorizontal: SIZES.padding,
-                    borderWidth: 2,
-                    borderRadius: SIZES.radius,
-                    borderColor: COLORS.lightGray2
-                }}>
-                    <Image
-                        source={icons.location1}
-                        style={{
-                            width: 40,
-                            height: 40
-                        }}
-                    />
-                    <Text style={{
-                        marginLeft: SIZES.radius,
-                        width: '85%',
-                        ...FONTS.body3
-                    }}>302 - Balgandharv, sadhashiv peth,pune.</Text>
+                {/* Thanh toán khi nhận hàng */}
+                <TouchableOpacity
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        padding: SIZES.radius,
+                        borderWidth: 1,
+                        borderColor: selectedPayment === "cod" ? COLORS.primary : COLORS.gray2,
+                        borderRadius: SIZES.radius,
+                        marginBottom: SIZES.base,
+                        backgroundColor: selectedPayment === "cod" ? COLORS.lightGray1 : COLORS.white,
+                    }}
+                    onPress={() => setSelectedPayment("cod")}
+                >
+                    <Image source={icons.cash} style={{ width: 24, height: 24, marginRight: SIZES.radius }} />
+                    <Text style={{ flex: 1, ...FONTS.body3 }}>Thanh toán khi nhận hàng</Text>
+                    {selectedPayment === "cod" && <Image source={icons.check} style={{ width: 20, height: 20, tintColor: COLORS.primary }} />}
+                </TouchableOpacity>
+
+                {/* VNPay */}
+                <TouchableOpacity
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        padding: SIZES.radius,
+                        borderWidth: 1,
+                        borderColor: selectedPayment === "vnpay" ? COLORS.primary : COLORS.gray2,
+                        borderRadius: SIZES.radius,
+                        backgroundColor: selectedPayment === "vnpay" ? COLORS.lightGray1 : COLORS.white,
+                    }}
+                    onPress={() => setSelectedPayment("vnpay")}
+                >
+                    <Image source={icons.vnpay} style={{ width: 24, height: 24, marginRight: SIZES.radius }} />
+                    <Text style={{ flex: 1, ...FONTS.body3 }}>Thanh toán qua VNPay</Text>
+                    {selectedPayment === "vnpay" && <Image source={icons.check} style={{ width: 20, height: 20, tintColor: COLORS.primary }} />}
+                </TouchableOpacity>
+            </View>
+
+            {/* Store Information */}
+            <View style={{ marginBottom: SIZES.padding }}>
+                <Text style={{ ...FONTS.h3, marginBottom: SIZES.base }}>Cửa hàng</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", padding: SIZES.radius, borderWidth: 1, borderColor: COLORS.gray2, borderRadius: SIZES.radius }}>
+                    <Image source={{ uri: `https://nguyenmax007.pythonanywhere.com${store.owner_avatar}` }} style={{ width: 24, height: 24, marginRight: SIZES.radius }} />
+                    <Text style={{ flex: 1, ...FONTS.body3 }}>{store.name}</Text>
                 </View>
             </View>
-        )
-    }
-    const renderCoupons = () => {
-        return (
-            <View style={{
-                marginTop: SIZES.padding
-            }}>
-                <Text style={{ ...FONTS.h3 }}>Add Cooupon</Text>
-                <FontInput2
-                    inputContainerStyle={{
-                        marginTop: 0,
-                        paddingLeft: SIZES.padding,
-                        paddingRight: 0,
-                        borderWidth: 2,
-                        borderColor: COLORS.lightGray2,
-                        backgroundColor: COLORS.white,
-                        overflow: 'hidden'
-                    }}
-                    placeholder="Coupon Code"
-                    appendComponent={
-                        <View style={{
-                            width: 60,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: COLORS.primary
 
-                        }}>
-                            <Image
-                            source={icons.discount}
-                            style={{
-                                width:35,
-                                height:35
-                            }}
-                            />
-                        </View>
-                    }
-
-                />
+            {/* Selected Foods */}
+            <View style={{ marginBottom: SIZES.padding }}>
+                <Text style={{ ...FONTS.h3, marginBottom: SIZES.base }}>Các món đã chọn</Text>
+                {renderSelectedFoods()}
             </View>
-        )
-    }
 
+            {/* Order Summary */}
+            <View style={{ marginBottom: SIZES.padding }}>
+                <Text style={{ ...FONTS.h3, marginBottom: SIZES.base }}>Tóm tắt đơn hàng</Text>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: SIZES.base }}>
+                    <Text style={{ ...FONTS.body3 }}>Tổng phụ</Text>
+                    <Text style={{ ...FONTS.body3 }}>{total} VNĐ</Text>
+                </View>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: SIZES.base }}>
+                    <Text style={{ ...FONTS.body3 }}>Phí vận chuyển</Text>
+                    <Text style={{ ...FONTS.body3 }}>₫0.00</Text>
+                </View>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: SIZES.radius }}>
+                    <Text style={{ ...FONTS.h3 }}>Tổng cộng</Text>
+                    <Text style={{ ...FONTS.h3 }}>{total} VNĐ</Text>
+                </View>
+            </View>
 
-    return (
-        <View
-            style={{
-                flex: 1,
-                backgroundColor: COLORS.white
-            }}
-        >
-            {/* header */}
-            {renderHeader()}
-
-            {/* Body */}
-            <KeyboardAwareScrollView
-                keyboardDismissMode="on-drag"
-                extraScrollHeight={-200}
-                contentContainerStyle={{
-                    flexGrow: 1,
-                    paddingHorizontal: SIZES.padding,
-                    paddingBottom: 20
-                }}
-            >
-                {/* My cards */}
-                {renderMyCards()}
-                {/* Delivary ADdress */}
-                {renderDelivaryAddress()}
-                {/* Coupons */}
-                {renderCoupons()}
-            </KeyboardAwareScrollView>
-
-            <FooterTotal
-                subTotal={37.97}
-                shippingFee={0.00}
-                total={37.97}
-                onPress={() => navigation.replace("Success")}
+            {/* Confirm Order Button */}
+            <TextButton
+                label="Xác nhận đặt hàng"
+                buttonContainerStyle={{ height: 55, alignItems: "center", borderRadius: SIZES.radius, backgroundColor: COLORS.primary }}
+                onPress={handleConfirmOrder}
             />
-        </View>
-    )
-}
+        </ScrollView>
+    );
+};
 
 export default Checkout;

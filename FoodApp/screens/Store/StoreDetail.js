@@ -7,6 +7,7 @@ import { StepperInput, TextButton } from '../../components'; // Import StepperIn
 
 const StoreDetail = () => {
   const [store, setStore] = useState(null);
+  const [menus, setMenus] = useState([]);
   const [foods, setFoods] = useState([]);
   const [quantities, setQuantities] = useState({});
   const navigation = useNavigation();
@@ -15,7 +16,7 @@ const StoreDetail = () => {
 
   useEffect(() => {
     loadStoreDetails();
-    loadStoreFoods();
+    loadStoreMenus();
   }, []);
 
   const loadStoreDetails = async () => {
@@ -27,12 +28,36 @@ const StoreDetail = () => {
     }
   };
 
-  const loadStoreFoods = async () => {
+  const loadStoreMenus = async () => {
     try {
+      console.log('Fetching store foods...');
       let res = await axios.get(endpoints.storeFoods(storeId));
-      setFoods(res.data);
+      console.log('Store foods fetched:', res.data);
+
+      const menuIds = [...new Set(res.data.map(food => food.menu))].filter(menuId => menuId !== null);
+      console.log('Menu IDs:', menuIds);
+
+      const menuPromises = menuIds.map(menuId => {
+        console.log(`Fetching menu details for menu ID: ${menuId}`);
+        return axios.get(endpoints.menuDetails(menuId));
+      });
+
+      const menuResponses = await Promise.all(menuPromises);
+      console.log('Menu responses:', menuResponses);
+
+      const menusWithFoods = menuResponses.map(menuRes => ({
+        ...menuRes.data,
+        foods: res.data.filter(food => food.menu === menuRes.data.id),
+      }));
+      console.log('Menus with Foods:', menusWithFoods);
+
+      const foodsWithoutMenu = res.data.filter(food => food.menu === null);
+      console.log('Foods without Menu:', foodsWithoutMenu);
+
+      setMenus(menusWithFoods);
+      setFoods(foodsWithoutMenu);
     } catch (error) {
-      console.error('Error fetching store foods:', error);
+      console.error('Error fetching store menus:', error);
     }
   };
 
@@ -46,6 +71,7 @@ const StoreDetail = () => {
       if (newQuantities[id] < 0) {
         newQuantities[id] = 0;
       }
+      console.log('Quantities:', newQuantities); // Log quantities
       return newQuantities;
     });
   };
@@ -58,10 +84,21 @@ const StoreDetail = () => {
   };
 
   const calculateTotal = () => {
-    return foods.reduce((total, item) => {
+    const totalFoods = foods.reduce((total, item) => {
       const quantity = quantities[item.id] || 0;
       return total + (item.price * quantity);
     }, 0);
+
+    const totalMenus = menus.reduce((total, menu) => {
+      return total + menu.foods.reduce((menuTotal, item) => {
+        const quantity = quantities[item.id] || 0;
+        return menuTotal + (item.price * quantity);
+      }, 0);
+    }, 0);
+
+    const total = totalFoods + totalMenus;
+    console.log('Total:', total); // Log total
+    return total;
   };
 
   const renderHeader = () => {
@@ -166,6 +203,22 @@ const StoreDetail = () => {
     );
   };
 
+  const renderMenu = ({ item }) => {
+    return (
+      <View>
+        <Text style={{ ...FONTS.h2, marginHorizontal: SIZES.padding, marginTop: SIZES.padding }}>
+          {item.name}
+        </Text>
+        <FlatList
+          data={item.foods}
+          keyExtractor={(food) => food.id.toString()}
+          renderItem={renderFoods}
+          contentContainerStyle={{ paddingBottom: SIZES.padding }}
+        />
+      </View>
+    );
+  };
+
   const renderFooter = () => {
     const total = calculateTotal();
     const hasItems = Object.values(quantities).some(quantity => quantity > 0);
@@ -173,6 +226,9 @@ const StoreDetail = () => {
     if (!hasItems) {
       return null;
     }
+
+    const checkoutData = { store: { ...store, foods: [...foods, ...menus.flatMap(menu => menu.foods)] }, quantities, total };
+    console.log('Checkout Data:', checkoutData); // Log checkout data
 
     return (
       <View
@@ -202,7 +258,10 @@ const StoreDetail = () => {
             backgroundColor: COLORS.primary,
           }}
           label="Thanh Toán"
-          onPress={() => navigation.navigate("MyCart")}
+          onPress={() => {
+            console.log('Navigating to Checkout with data:', checkoutData); // Log data before navigating
+            navigation.navigate("Checkout", checkoutData);
+          }}
         />
       </View>
     );
@@ -216,11 +275,28 @@ const StoreDetail = () => {
       }}>
       {renderHeader()}
       <FlatList
-        data={foods}
+        data={menus}
         keyExtractor={(item) => item.id.toString()}
         ListHeaderComponent={renderStoreInfo}
-        renderItem={renderFoods}
-        contentContainerStyle={{ paddingBottom: 150 }} // Ensure enough space for the footer
+        renderItem={renderMenu}
+        ListFooterComponent={() => (
+          <View>
+            {foods.length > 0 && (
+              <View>
+                <Text style={{ ...FONTS.h2, marginHorizontal: SIZES.padding, marginTop: SIZES.padding }}>
+                  Other Foods
+                </Text>
+                <FlatList
+                  data={foods}
+                  keyExtractor={(food) => food.id.toString()}
+                  renderItem={renderFoods}
+                  contentContainerStyle={{ paddingBottom: SIZES.padding }}
+                />
+              </View>
+            )}
+          </View>
+        )}
+        contentContainerStyle={{ paddingBottom: 150 }}
       />
       {renderFooter()}
     </View>
