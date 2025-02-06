@@ -5,6 +5,7 @@ from django.contrib.auth.hashers import make_password
 from .models import User, Store, Menu, Order, Food, Review,OrderItem
 from django.urls import path, include
 from django.http import HttpResponse
+from allauth.socialaccount.models import SocialApp
 
 
 class FoodDeliveryAdminSite(admin.AdminSite):
@@ -35,3 +36,4 @@ admin_site.register(Order)
 admin_site.register(Food)
 admin_site.register(Review)
 admin_site.register(OrderItem)
+admin_site.register(SocialApp)

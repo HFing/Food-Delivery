@@ -272,7 +272,10 @@ const Home = () => {
               height: 110,
               width: 110,
             }}
-            item={item}
+            item={{
+              ...item,
+              image: `https://nguyenmax007.pythonanywhere.com${item.image}` // Đảm bảo URL hình ảnh được định dạng đúng
+            }}
             onPress={() => navigation.navigate("StoreDetail", { storeId: item.store })}
           />
         )}
