@@ -40,6 +40,8 @@ import DeliveryStatus from "./Delivery/DeliveryStatus"
 // Food
 import FoodDetail from "./Food/FoodDetail"
 
+import OrderHistory from "./Order/OrderHistory";
+
 
 export {
     MainLayout,
@@ -61,5 +63,6 @@ export {
     SignIn,
     SignUp,
     Otp,
-    ForgotPassword
+    ForgotPassword,
+    OrderHistory
 }

@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Home from '../screens/Home/Home';
 import OnBoarding from '../screens/OnBoarding/OnBoarding';
 import Profile from '../screens/User/Profile';
+import OrderHistory from '../screens/Order/OrderHistory';
 import { MyUserContext, MyDispatchContext } from '../configs/MyUserContext'; // Import MyUserContext và MyDispatchContext
 import { BASE_URL } from '../configs/APIs'; // Import BASE_URL
 
@@ -57,7 +58,7 @@ const CustomDrawerContent = (props) => {
           <Text style={styles.drawerText}>My Wallet</Text>
         </TouchableOpacity>
         <View style={styles.separator} />
-        <TouchableOpacity style={styles.drawerItem}>
+        <TouchableOpacity style={styles.drawerItem} onPress={() => navigation.navigate('OrderHistory')}>
           <Text style={styles.drawerText}>Track Your Order</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem}>

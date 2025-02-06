@@ -14,6 +14,7 @@ export const endpoints = {
     'current-user': '/users/current-user/',
     menuDetails: (menuId) => `/menus/${menuId}/`,
     createOrder: '/orders/create_order/',
+    userOrders: '/orders/user_orders/',
 
 };
 
