@@ -46,15 +46,11 @@ class FoodSerializer(serializers.ModelSerializer):
         model = Food
         fields = '__all__'
 
-class OrderItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrderItem
-        fields = ['menu_item', 'quantity']
 
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
-        fields = ['menu_item', 'quantity']
+        fields = ['food_item', 'quantity']
 
 class OrderSerializer(serializers.ModelSerializer):
     order_items = OrderItemSerializer(many=True)
