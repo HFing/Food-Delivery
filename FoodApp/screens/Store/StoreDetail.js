@@ -30,29 +30,23 @@ const StoreDetail = () => {
 
   const loadStoreMenus = async () => {
     try {
-      console.log('Fetching store foods...');
       let res = await axios.get(endpoints.storeFoods(storeId));
-      console.log('Store foods fetched:', res.data);
 
       const menuIds = [...new Set(res.data.map(food => food.menu))].filter(menuId => menuId !== null);
-      console.log('Menu IDs:', menuIds);
 
       const menuPromises = menuIds.map(menuId => {
-        console.log(`Fetching menu details for menu ID: ${menuId}`);
         return axios.get(endpoints.menuDetails(menuId));
       });
 
       const menuResponses = await Promise.all(menuPromises);
-      console.log('Menu responses:', menuResponses);
 
       const menusWithFoods = menuResponses.map(menuRes => ({
         ...menuRes.data,
         foods: res.data.filter(food => food.menu === menuRes.data.id),
       }));
-      console.log('Menus with Foods:', menusWithFoods);
 
       const foodsWithoutMenu = res.data.filter(food => food.menu === null);
-      console.log('Foods without Menu:', foodsWithoutMenu);
+
 
       setMenus(menusWithFoods);
       setFoods(foodsWithoutMenu);
@@ -71,7 +65,6 @@ const StoreDetail = () => {
       if (newQuantities[id] < 0) {
         newQuantities[id] = 0;
       }
-      console.log('Quantities:', newQuantities); // Log quantities
       return newQuantities;
     });
   };
@@ -97,7 +90,7 @@ const StoreDetail = () => {
     }, 0);
 
     const total = totalFoods + totalMenus;
-    console.log('Total:', total); // Log total
+
     return total;
   };
 
@@ -139,6 +132,8 @@ const StoreDetail = () => {
   };
 
   const renderStoreInfo = () => {
+    if (!store) return null;
+
     return (
       <View
         style={{
@@ -228,23 +223,12 @@ const StoreDetail = () => {
     }
 
     const checkoutData = {
-      store: {
-        ...store,
-        foods: [...foods, ...menus.flatMap(menu => menu.foods).map(food => ({ ...food, menu: food.menu || null }))]
-      },
+      storeId: store.id,
       quantities,
       total
     };
 
-    // Log detailed checkoutData
-    console.log('>>>> Navigating to Checkout with data:');
-    console.log('Store:', checkoutData.store);
-    console.log('Quantities:', checkoutData.quantities);
-    console.log('Total:', checkoutData.total);
-    console.log('Foods:');
-    checkoutData.store.foods.forEach(food => {
-      console.log(`- ${food.name} (Menu: ${food.menu}): ${checkoutData.quantities[food.id] || 0}`);
-    });
+
 
     return (
       <View
@@ -275,8 +259,8 @@ const StoreDetail = () => {
           }}
           label="Thanh Toán"
           onPress={() => {
-            console.log('>>>> Navigating to Checkout with data:', checkoutData); // Log data before navigating
             navigation.navigate("Checkout", checkoutData);
+            console.log(">>>>> Check out data", checkoutData);
           }}
         />
       </View>

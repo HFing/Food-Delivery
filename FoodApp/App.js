@@ -20,7 +20,6 @@ import {
   AddCard,
   DeliveryStatus,
   Home,
-  Map,
   OnBoarding,
   SignIn,
   SignUp,
@@ -74,7 +73,7 @@ const App = () => {
               <Stack.Screen name="AddCard" component={AddCard} />
               <Stack.Screen name="MyCard" component={MyCard} />
               <Stack.Screen name="DeliveryStatus" component={DeliveryStatus} options={{ gestureEnabled: false }} />
-              <Stack.Screen name="Map" component={Map} />
+
             </Stack.Navigator>
           </NavigationContainer>
         </MyDispatchContext.Provider>

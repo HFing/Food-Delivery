@@ -35,7 +35,7 @@ import MyCard from "./Card/MyCard"
 
 // Delivery
 import DeliveryStatus from "./Delivery/DeliveryStatus"
-import Map from "./Delivery/Map"
+
 
 // Food
 import FoodDetail from "./Food/FoodDetail"
@@ -56,7 +56,6 @@ export {
     AddCard,
     MyCard,
     DeliveryStatus,
-    Map,
     OnBoarding,
     AuthLayout,
     SignIn,

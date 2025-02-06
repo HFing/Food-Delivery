@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.template.response import TemplateResponse
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.hashers import make_password
-from .models import User, Store, Menu, Order, Food, Review
+from .models import User, Store, Menu, Order, Food, Review,OrderItem
 from django.urls import path, include
 from django.http import HttpResponse
 
@@ -34,3 +34,4 @@ admin_site.register(Menu)
 admin_site.register(Order)
 admin_site.register(Food)
 admin_site.register(Review)
+admin_site.register(OrderItem)

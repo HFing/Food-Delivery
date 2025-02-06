@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, Text, TouchableOpacity, TextInput, Image, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
 import { COLORS, FONTS, SIZES, icons } from "../../constants";
 import TextButton from "../../components/TextButton";
 import { MyUserContext } from "../../configs/MyUserContext";
-import { authApis, endpoints } from "../../configs/APIs";
+import { authApis, endpoints, BASE_URL } from "../../configs/APIs";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
 const Checkout = ({ route, navigation }) => {
-    const { store, quantities, total } = route.params;
+    const { storeId, quantities, total } = route.params;
+    const [storeDetails, setStoreDetails] = useState(null);
+    const [foods, setFoods] = useState([]);
     const [selectedPayment, setSelectedPayment] = useState(null);
     const [token, setToken] = useState(null);
     const user = useContext(MyUserContext);
@@ -17,26 +19,54 @@ const Checkout = ({ route, navigation }) => {
         const fetchToken = async () => {
             const storedToken = await AsyncStorage.getItem('token');
             setToken(storedToken);
-            console.log('Stored Token:', storedToken);
         };
 
         fetchToken();
+        fetchStoreDetails();
+        fetchSelectedFoods();
+    }, [storeId, quantities, total]);
 
-        // Log the data received from route.params
-        console.log('Store:', store);
-        console.log('Quantities:', quantities);
-        console.log('Total:', total);
-    }, [store, quantities, total]);
+    const fetchStoreDetails = async () => {
+        const url = `https://nguyenmax007.pythonanywhere.com${endpoints.storeDetails(storeId)}`;
+        try {
+            let res = await axios.get(url);
+            setStoreDetails(res.data);
+        } catch (error) {
+            console.error('Error fetching store details:', error);
+            if (error.response) {
+                console.error('Response data:', error.response.data);
+                console.error('Response status:', error.response.status);
+                console.error('Response headers:', error.response.headers);
+            } else if (error.request) {
+                console.error('Request data:', error.request);
+            } else {
+                console.error('Error message:', error.message);
+            }
+        }
+    };
+
+    const fetchSelectedFoods = async () => {
+        const foodIds = Object.keys(quantities);
+        const foodDetailsPromises = foodIds.map(foodId => {
+            const url = `https://nguyenmax007.pythonanywhere.com${endpoints.foodDetails(foodId)}`;
+            return axios.get(url);
+        });
+
+        try {
+            const foodDetailsResponses = await Promise.all(foodDetailsPromises);
+            const foodsData = foodDetailsResponses.map(response => response.data);
+            setFoods(foodsData);
+        } catch (error) {
+            console.error('Error fetching food details:', error);
+        }
+    };
 
     const renderSelectedFoods = () => {
-        return Object.keys(quantities).map((foodId) => {
-            const food = store.foods.find((item) => item.id === parseInt(foodId));
-            if (!food) return null;
-
+        return foods.map((food) => {
+            const quantity = quantities[food.id];
             return (
                 <View key={food.id} style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: SIZES.base }}>
-                    <Text style={{ ...FONTS.body3 }}>{food.name} x {quantities[food.id]}</Text>
-                    <Text style={{ ...FONTS.body3 }}>{food.price * quantities[food.id]} VNĐ</Text>
+                    <Text style={{ ...FONTS.body3 }}>{food.name} x {quantity}</Text>
                 </View>
             );
         });
@@ -48,45 +78,24 @@ const Checkout = ({ route, navigation }) => {
             return;
         }
 
-        const orderItems = await Promise.all(Object.keys(quantities).map(async (foodId) => {
-            const food = store.foods.find((item) => item.id === parseInt(foodId));
-            if (!food) {
-                console.error(`Food item with ID ${foodId} does not exist.`);
-                return null;
-            }
-
-            // Fetch menu details for the food item
-            let menuItem = null;
-            if (food.menu) {
-                try {
-                    const response = await axios.get(endpoints.menuDetails(food.menu));
-                    menuItem = response.data.id;
-                } catch (error) {
-                    console.error(`Failed to fetch menu details for food ID ${foodId}:`, error);
-                }
-            }
-
-            return {
-                menu_item: menuItem,
-                quantity: quantities[foodId]
-            };
-        }));
-
-        if (orderItems.length === 0) {
-            alert("Không có món ăn hợp lệ để đặt hàng.");
+        if (!storeDetails) {
+            alert("Dữ liệu cửa hàng không hợp lệ. Vui lòng thử lại.");
             return;
         }
 
-        const orderData = {
-            user: user.id, // Ensure user ID is included
-            store: store.id,
-            total_amount: total.toString(), // Convert total to string
-            payment_method: selectedPayment,
-            order_items: orderItems.filter(item => item !== null)
-        };
+        const orderItems = foods.map(food => ({
+            food_item: food.id,
+            quantity: quantities[food.id]
+        }));
 
-        // Log the order data before sending
-        console.log('>>>>> Order Data:', orderData);
+        const orderData = {
+            user: user.id,
+            store: parseInt(storeId, 10), // Ép kiểu storeId thành số nguyên
+            total_amount: total.toString(),
+            payment_method: selectedPayment,
+            status: "pending",
+            order_items: orderItems
+        };
 
         try {
             const response = await authApis(token).post(endpoints.createOrder, orderData);
@@ -97,7 +106,7 @@ const Checkout = ({ route, navigation }) => {
                 alert("Đã xảy ra lỗi khi đặt hàng. Vui lòng thử lại.");
             }
         } catch (error) {
-            console.error('Error response:', error.response); // Log the error response for debugging
+            console.error('Error response:', error.response);
             alert("Đã xảy ra lỗi khi đặt hàng. Vui lòng thử lại.");
         }
     };
@@ -175,13 +184,15 @@ const Checkout = ({ route, navigation }) => {
             </View>
 
             {/* Store Information */}
-            <View style={{ marginBottom: SIZES.padding }}>
-                <Text style={{ ...FONTS.h3, marginBottom: SIZES.base }}>Cửa hàng</Text>
-                <View style={{ flexDirection: "row", alignItems: "center", padding: SIZES.radius, borderWidth: 1, borderColor: COLORS.gray2, borderRadius: SIZES.radius }}>
-                    <Image source={{ uri: `https://nguyenmax007.pythonanywhere.com${store.owner_avatar}` }} style={{ width: 24, height: 24, marginRight: SIZES.radius }} />
-                    <Text style={{ flex: 1, ...FONTS.body3 }}>{store.name}</Text>
+            {storeDetails && (
+                <View style={{ marginBottom: SIZES.padding }}>
+                    <Text style={{ ...FONTS.h3, marginBottom: SIZES.base }}>Cửa hàng</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", padding: SIZES.radius, borderWidth: 1, borderColor: COLORS.gray2, borderRadius: SIZES.radius }}>
+                        <Image source={{ uri: `https://nguyenmax007.pythonanywhere.com${storeDetails?.owner_avatar}` }} style={{ width: 24, height: 24, marginRight: SIZES.radius }} />
+                        <Text style={{ flex: 1, ...FONTS.body3 }}>{storeDetails?.name}</Text>
+                    </View>
                 </View>
-            </View>
+            )}
 
             {/* Selected Foods */}
             <View style={{ marginBottom: SIZES.padding }}>

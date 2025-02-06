@@ -21,6 +21,8 @@ from django.http import JsonResponse, HttpResponseNotFound
 from django.utils import timezone
 from fooddelivery.serializers import OrderSerializer
 from rest_framework.permissions import IsAuthenticated
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 
 
@@ -176,6 +178,24 @@ class StoreUpdateView(View):
             return redirect('store_dashboard')
         return render(request, 'store/update.html', {'form': form})
 
+@method_decorator(csrf_exempt, name='dispatch')
+class ChangeOrderStatusView(View):
+    def post(self, request, order_id):
+        try:
+            order = Order.objects.get(id=order_id, store__owner=request.user)
+        except Order.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Order not found'})
+
+        data = json.loads(request.body)
+        status = data.get('status')
+        if status in dict(Order.STATUS_CHOICES):
+            order.status = status
+            order.save()
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid status'})
+
+
 class MenuCreateView(CreateView):
     model = Menu
     form_class = MenuForm
@@ -279,7 +299,7 @@ class OrderDetailView(View):
             'user': order.user.username,
             'total_amount': str(order.total_amount),
             'status': order.status,
-            'items': [{'menu_item': item.menu_item.name, 'quantity': item.quantity} for item in items]
+            'items': [{'menu_item': item.food_item.name, 'quantity': item.quantity} for item in items]
         }
         return JsonResponse(data)
 

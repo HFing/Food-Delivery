@@ -6,17 +6,17 @@ import {
     ScrollView
 } from 'react-native';
 
-import { Header2, Linedevider, TextButton,TextIconbutton2 } from '../../components'
+import { Header2, Linedevider, TextButton } from '../../components'
 import { FONTS, COLORS, SIZES, icons, constants } from '../../constants';
+
 const DeliveryStatus = ({ navigation }) => {
 
     const [currentStep, setCurrentStep] = React.useState(2);
 
-
     const renderHeader = () => {
         return (
             <Header2
-                title="DELIVARY STATUS "
+                title="DELIVERY STATUS"
                 containerStyle={{
                     height: 50,
                     marginHorizontal: SIZES.padding,
@@ -31,10 +31,9 @@ const DeliveryStatus = ({ navigation }) => {
             <View style={{
                 marginTop: SIZES.radius,
                 paddingHorizontal: SIZES.padding
-
             }}>
                 <Text style={{ textAlign: 'center', color: COLORS.gray, ...FONTS.body4 }}>
-                    Estimated Delivary
+                    Estimated Delivery
                 </Text>
                 <Text style={{ textAlign: 'center', ...FONTS.h2 }}>21 Sept 2021/ 12.30PM</Text>
             </View>
@@ -69,10 +68,7 @@ const DeliveryStatus = ({ navigation }) => {
                 <View style={{ marginTop: SIZES.padding, paddingHorizontal: SIZES.padding }}>
                     {constants.track_order_status.map((item, index) => {
                         return (
-                            <View
-                                key={`StatusList-${index}`}
-
-                            >
+                            <View key={`StatusList-${index}`}>
                                 <View style={{
                                     flexDirection: 'row',
                                     alignItems: 'center',
@@ -118,7 +114,6 @@ const DeliveryStatus = ({ navigation }) => {
                                                 }}
                                             />
                                         }
-
                                     </View>
                                 }
                             </View>
@@ -128,6 +123,7 @@ const DeliveryStatus = ({ navigation }) => {
             </View>
         )
     }
+
     const renderFooter = () => {
         return (
             <View style={{
@@ -136,59 +132,38 @@ const DeliveryStatus = ({ navigation }) => {
             }}>
                 {currentStep < constants.track_order_status.length - 1 &&
                     <View style={{
-                        flexDirection:'row',
-                        height:55
+                        flexDirection: 'row',
+                        height: 55
                     }}>
-
                         {/* Cancel */}
-                        <TextButton 
-                        buttonContainerStyle={{
-                            width:"40%",
-                            borderRadius:SIZES.base,
-                            backgroundColor:COLORS.lightGray2
-                        }}
-                        label="Cancel"
-                        labelStyle={{
-                            color:COLORS.primary
-                        }}
-                        onPress={() => navigation.navigate("FoodDetail")}
-                        />
-
-                        {/* MapView */}
-                        <TextIconbutton2
-                        containerStyle={{
-                            flex:1,
-                            marginLeft:SIZES.radius,
-                            borderRadius:SIZES.base,
-                            backgroundColor:COLORS.primary
-                        }}
-                        label="Map View"
-                        labelStyle={{color:COLORS.white,...FONTS.h3}}
-                        icon={icons.map}
-                        iconPosition="LEFT"
-                        iconStyle={{
-                            width:25,
-                            height:25,
-                            marginRight:SIZES.base,
-                            tintColor:COLORS.white
-                        }}
-                        onPress={() => navigation.navigate("Map")}
+                        <TextButton
+                            buttonContainerStyle={{
+                                flex: 1,
+                                borderRadius: SIZES.base,
+                                backgroundColor: COLORS.lightGray2
+                            }}
+                            label="Cancel"
+                            labelStyle={{
+                                color: COLORS.primary
+                            }}
+                            onPress={() => navigation.navigate("Home")}
                         />
                     </View>
                 }
-                {currentStep >= constants.track_order_status.length -1 &&
-                <TextButton 
-                buttonContainerStyle={{
-                    height:55,
-                    borderRadius:SIZES.base
-                }}
-                label="DONE"
-                onPress={() => navigation.navigate("FoodDetail")}
-                />
+                {currentStep >= constants.track_order_status.length - 1 &&
+                    <TextButton
+                        buttonContainerStyle={{
+                            height: 55,
+                            borderRadius: SIZES.base
+                        }}
+                        label="DONE"
+                        onPress={() => navigation.navigate("Home")}
+                    />
                 }
             </View>
         )
     }
+
     return (
         <View
             style={{

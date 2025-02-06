@@ -67,10 +67,28 @@
         }
         #order-details {
             background: white;
-            padding: 15px;
+            padding: 20px;
             margin-top: 20px;
-            border-radius: 6px;
+            border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+        #order-details h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        #order-details p {
+            margin: 5px 0;
+        }
+        #order-details ul {
+            list-style: none;
+            padding: 0;
+        }
+        #order-details ul li {
+            background: #ecf0f1;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 6px;
         }
         .back-home {
             margin-top: 20px;
@@ -102,7 +120,7 @@
         <ul class="order-list">
             {% for order in orders %}
             <li onclick="showOrderDetails({{ order.id }})">
-                Order #{{ order.id }} - {{ order.user.username }}
+                Order #{{ order.id }} - {{ order.total_amount|floatformat:0 }} VND
             </li>
             {% endfor %}
         </ul>
@@ -121,15 +139,41 @@
                 document.getElementById('order-details').style.display = 'block';
                 document.getElementById('order-details').innerHTML = `
                     <h3>Order Details</h3>
-                    <p><strong>User:</strong> ${data.user}</p>
-                    <p><strong>Total Amount:</strong> ${data.total_amount}</p>
+                    <p><strong>Customer:</strong> ${data.user}</p>
+                    <p><strong>Total Amount:</strong> ${parseFloat(data.total_amount).toFixed(0)} VND</p>
                     <p><strong>Status:</strong> ${data.status}</p>
                     <h4>Items:</h4>
                     <ul>
                         ${data.items.map(item => `<li>${item.menu_item} - Quantity: ${item.quantity}</li>`).join('')}
                     </ul>
+                    <label for="status">Change Status:</label>
+                    <select id="status" onchange="changeOrderStatus(${orderId}, this.value)">
+                        <option value="pending" ${data.status === 'pending' ? 'selected' : ''}>Pending</option>
+                        <option value="confirmed" ${data.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                        <option value="shipped" ${data.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                    </select>
                 `;
             });
+    }
+
+    function changeOrderStatus(orderId, status) {
+        fetch(`/store/order/${orderId}/change_status/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ status: status })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Order status updated successfully.');
+                showOrderDetails(orderId);
+            } else {
+                alert('Failed to update order status.');
+            }
+        });
     }
     </script>
 </body>

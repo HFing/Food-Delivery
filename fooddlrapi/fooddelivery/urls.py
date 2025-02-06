@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework import routers
 from fooddelivery import views
-from .views import store_dashboard, CustomLoginView, StoreRegistrationView, StoreUpdateView, MenuCreateView, MenuFoodManagementView, FoodCreateView, MenuUpdateView, FoodUpdateView,custom_logout_view, OrdersByDateView, OrderDetailView, OrderViewSet
+from .views import store_dashboard, CustomLoginView, StoreRegistrationView, StoreUpdateView, MenuCreateView, MenuFoodManagementView, FoodCreateView, MenuUpdateView, FoodUpdateView,custom_logout_view, OrdersByDateView, OrderDetailView, OrderViewSet, ChangeOrderStatusView
 from django.contrib.auth import views as auth_views
 
 routers = routers.DefaultRouter()
@@ -27,4 +27,7 @@ urlpatterns = [
     path('logout/', custom_logout_view, name='logout'),
 path('store/orders/', OrdersByDateView.as_view(), name='orders_by_date'),
     path('store/order/<int:order_id>/details/', OrderDetailView.as_view(), name='order_details'),
+    path('store/order/<int:order_id>/change_status/', ChangeOrderStatusView.as_view(), name='change_order_status'),
+    path('store/order/<int:order_id>/details/', OrderDetailView.as_view(), name='order_details'),
+
 ]

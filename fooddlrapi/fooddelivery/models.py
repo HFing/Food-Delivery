@@ -59,8 +59,9 @@ class Food(Base):
     # image = CloudinaryField('image', blank=True, null=True)
     is_available = models.BooleanField(default=True)
     menu = models.ForeignKey(Menu, on_delete=models.SET_NULL, related_name='foods', null=True, blank=True)
+
     def __str__(self):
-        return f"{self.name} ({self.time_slot})"
+        return self.name
 
 # Order model (Thông tin đơn hàng)
 class Order(Base):
