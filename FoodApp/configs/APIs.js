@@ -13,6 +13,7 @@ export const endpoints = {
     updateUser: '/users/update/',
     'current-user': '/users/current-user/',
     menuDetails: (menuId) => `/menus/${menuId}/`,
+    createOrder: '/orders/create_order/',
 
 };
 

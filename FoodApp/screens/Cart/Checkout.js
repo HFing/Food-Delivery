@@ -1,19 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { View, Text, TouchableOpacity, TextInput, Image, ScrollView } from "react-native";
 import { COLORS, FONTS, SIZES, icons } from "../../constants";
 import TextButton from "../../components/TextButton";
-import axios from 'axios';
+import { MyUserContext } from "../../configs/MyUserContext";
+import { authApis, endpoints } from "../../configs/APIs";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Checkout = ({ route, navigation }) => {
     const { store, quantities, total } = route.params;
     const [selectedPayment, setSelectedPayment] = useState(null);
+    const [token, setToken] = useState(null);
+    const user = useContext(MyUserContext);
 
     useEffect(() => {
+        const fetchToken = async () => {
+            const storedToken = await AsyncStorage.getItem('token');
+            setToken(storedToken);
+            console.log('Stored Token:', storedToken); // Log the stored token to ensure it's being retrieved correctly
+        };
+
+        fetchToken();
+
         // Log the data received from route.params
         console.log('Store:', store);
         console.log('Quantities:', quantities);
         console.log('Total:', total);
-    }, []);
+    }, [store, quantities, total]);
 
     const renderSelectedFoods = () => {
         return Object.keys(quantities).map((foodId) => {
@@ -35,27 +47,38 @@ const Checkout = ({ route, navigation }) => {
             return;
         }
 
-        const orderData = {
-            store: store.id,
-            total_amount: total,
-            payment_method: selectedPayment,
-            order_items: Object.keys(quantities).map(foodId => ({
+        const orderItems = Object.keys(quantities).map(foodId => {
+            const food = store.foods.find((item) => item.id === parseInt(foodId));
+            if (!food) {
+                console.error(`Food item with ID ${foodId} does not exist.`);
+                return null;
+            }
+            return {
                 menu_item: parseInt(foodId),
                 quantity: quantities[foodId]
-            }))
+            };
+        }).filter(item => item !== null);
+
+        if (orderItems.length === 0) {
+            alert("Không có món ăn hợp lệ để đặt hàng.");
+            return;
+        }
+
+        const orderData = {
+            user: user.id, // Ensure user ID is included
+            store: store.id,
+            total_amount: total.toString(), // Convert total to string
+            payment_method: selectedPayment,
+            order_items: orderItems
         };
 
         try {
-            const response = await axios.post('http://your-api-url/orders/create_order/', orderData, {
-                headers: {
-                    Authorization: `Bearer ${your_token}`
-                }
-            });
+            const response = await authApis(token).post(endpoints.createOrder, orderData);
             if (response.status === 201) {
                 navigation.replace("Success");
             }
         } catch (error) {
-            console.error(error);
+            console.error('Error response:', error.response); // Log the error response for debugging
             alert("Đã xảy ra lỗi khi đặt hàng. Vui lòng thử lại.");
         }
     };

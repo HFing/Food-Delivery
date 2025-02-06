@@ -287,7 +287,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
-    @action(methods=['post'], detail=False, permission_classes=[IsAuthenticated])
+    @action(methods=['post'], detail=False, permission_classes=[permissions.IsAuthenticated])
     def create_order(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
