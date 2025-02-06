@@ -93,7 +93,7 @@ class Order(Base):
 # OrderItem model (Thông tin món ăn trong đơn hàng)
 class OrderItem(Base):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
-    menu_item = models.ForeignKey(Menu, on_delete=models.CASCADE)
+    menu_item = models.ForeignKey(Menu, on_delete=models.CASCADE, null=True, blank=True)
     quantity = models.PositiveIntegerField(default=1)
 
 # Review model (Thông tin đánh giá)
