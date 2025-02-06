@@ -42,6 +42,19 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
         serializer.save()
         return Response(serializer.data)
 
+    @action(methods=['post'], detail=False, url_path='follow-store', permission_classes=[permissions.IsAuthenticated])
+    def follow_store(self, request):
+        store_id = request.data.get('store_id')
+        if not store_id:
+            return Response({'error': 'Store ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            store = Store.objects.get(id=store_id)
+        except Store.DoesNotExist:
+            return Response({'error': 'Store not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        request.user.followed_stores.add(store)
+        return Response({'success': 'Store followed successfully'})
+
 class StoreViewSet(viewsets.ModelViewSet):
     queryset = Store.objects.filter(is_active=True)
     serializer_class = serializers.StoreSerializer
