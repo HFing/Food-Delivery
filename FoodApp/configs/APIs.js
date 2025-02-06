@@ -15,7 +15,7 @@ export const endpoints = {
     menuDetails: (menuId) => `/menus/${menuId}/`,
     createOrder: '/orders/create_order/',
     userOrders: '/orders/user_orders/',
-
+    searchFoods: '/foods/search/',
 };
 
 export const authApis = (token) => {

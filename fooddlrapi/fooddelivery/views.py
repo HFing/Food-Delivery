@@ -100,12 +100,9 @@ class FoodViewSet(viewsets.ModelViewSet):
     @action(methods=['get'], detail=False, url_path='search', permission_classes=[permissions.AllowAny])
     def search_foods(self, request):
         name = request.query_params.get('name', None)
-        store = request.query_params.get('store', None)
         foods = Food.objects.filter(is_available=True)
         if name:
-            foods = foods.filter(name__icontains=name)
-        if store:
-            foods = foods.filter(store__name__icontains=store)
+            foods = foods.filter(name__iexact=name)
 
         serializer = serializers.FoodSerializer(foods, many=True)
         return Response(serializer.data)

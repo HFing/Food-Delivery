@@ -43,6 +43,8 @@ const Home = () => {
   const [menuList, setMenuList] = React.useState([]);
   const [showFilterModel, setShowFilterModel] = React.useState(false);
   const [loading, setLoading] = React.useState(true); // State to track loading
+  const [searchQuery, setSearchQuery] = React.useState(''); // State to track search query
+  const [searchResults, setSearchResults] = React.useState([]); // State to track search results
 
   const navigation = useNavigation();
 
@@ -70,6 +72,27 @@ const Home = () => {
       console.error('Error fetching stores:', error);
     } finally {
       setLoading(false); // Set loading to false after data is fetched
+    }
+  };
+
+  const handleSearch = async () => {
+    if (searchQuery.trim() === '') {
+      setSearchResults([]);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      let res = await axios.get(endpoints.searchFoods, {
+        params: {
+          query: searchQuery
+        }
+      });
+      setSearchResults(res.data);
+    } catch (error) {
+      console.error('Error searching foods:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -137,6 +160,9 @@ const Home = () => {
         <TextInput
           style={{ flex: 1, marginLeft: SIZES.radius, ...FONTS.body3 }}
           placeholder="Search food..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onSubmitEditing={handleSearch}
         />
         {/* filter button */}
         <TouchableOpacity onPress={() => setShowFilterModel(true)}>
@@ -224,6 +250,37 @@ const Home = () => {
     );
   }
 
+  function renderSearchResults() {
+    if (searchResults.length === 0) {
+      return null;
+    }
+
+    return (
+      <FlatList
+        data={searchResults}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <HorizontalFoodCard
+            containerStyle={{
+              height: 130,
+              alignItems: 'center',
+              marginHorizontal: SIZES.padding,
+              marginBottom: SIZES.radius,
+            }}
+            imageStyle={{
+              marginTop: 20,
+              height: 110,
+              width: 110,
+            }}
+            item={item}
+            onPress={() => navigation.navigate("StoreDetail", { storeId: item.store })}
+          />
+        )}
+        ListFooterComponent={<View style={{ height: 200 }} />}
+      />
+    );
+  }
+
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -244,41 +301,45 @@ const Home = () => {
         <FilterModel isVisible={showFilterModel} onClose={() => setShowFilterModel(false)} />
       }
       {/* List */}
-      <FlatList
-        data={menuList}
-        keyExtractor={(item) => `${item.id}`}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <View>
-            {/* Popular */}
-            {renderPopular()}
-            {/* recommended */}
-            {renderRecommendedSection()}
-          </View>
-        }
-        renderItem={({ item, index }) => {
-          return (
-            <HorizontalFoodCard
-              containerStyle={{
-                height: 130,
-                alignItems: 'center',
-                marginHorizontal: SIZES.padding,
-                marginBottom: SIZES.radius,
-              }}
-              imageStyle={{
-                marginTop: 20,
-                height: 110,
-                width: 110,
-              }}
-              item={item}
-              onPress={() => navigation.navigate("StoreDetail", { storeId: item.storeId })}
-            />
-          );
-        }}
-        ListFooterComponent={
-          <View style={{ height: 200 }} />
-        }
-      />
+      {searchResults.length > 0 ? (
+        renderSearchResults()
+      ) : (
+        <FlatList
+          data={menuList}
+          keyExtractor={(item) => `${item.id}`}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <View>
+              {/* Popular */}
+              {renderPopular()}
+              {/* recommended */}
+              {renderRecommendedSection()}
+            </View>
+          }
+          renderItem={({ item, index }) => {
+            return (
+              <HorizontalFoodCard
+                containerStyle={{
+                  height: 130,
+                  alignItems: 'center',
+                  marginHorizontal: SIZES.padding,
+                  marginBottom: SIZES.radius,
+                }}
+                imageStyle={{
+                  marginTop: 20,
+                  height: 110,
+                  width: 110,
+                }}
+                item={item}
+                onPress={() => navigation.navigate("StoreDetail", { storeId: item.storeId })}
+              />
+            );
+          }}
+          ListFooterComponent={
+            <View style={{ height: 200 }} />
+          }
+        />
+      )}
     </View>
   );
 };
