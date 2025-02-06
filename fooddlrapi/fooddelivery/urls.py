@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework import routers
 from fooddelivery import views
-from .views import store_dashboard, CustomLoginView, StoreRegistrationView, StoreUpdateView, MenuCreateView, MenuFoodManagementView, FoodCreateView, MenuUpdateView, FoodUpdateView,custom_logout_view, OrdersByDateView, OrderDetailView
+from .views import store_dashboard, CustomLoginView, StoreRegistrationView, StoreUpdateView, MenuCreateView, MenuFoodManagementView, FoodCreateView, MenuUpdateView, FoodUpdateView,custom_logout_view, OrdersByDateView, OrderDetailView, OrderViewSet
 from django.contrib.auth import views as auth_views
 
 routers = routers.DefaultRouter()
@@ -9,6 +9,7 @@ routers.register(r'stores', views.StoreViewSet, basename='store')
 routers.register(r'users', views.UserViewSet, basename='user')
 routers.register(r'menus', views.MenuViewSet, basename='menu')
 routers.register(r'foods', views.FoodViewSet, basename='food')
+routers.register(r'orders', OrderViewSet, basename='order')
 
 
 

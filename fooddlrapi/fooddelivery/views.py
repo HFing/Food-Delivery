@@ -19,6 +19,8 @@ from django.contrib.auth import logout
 import random
 from django.http import JsonResponse, HttpResponseNotFound
 from django.utils import timezone
+from fooddelivery.serializers import OrderSerializer
+from rest_framework.permissions import IsAuthenticated
 
 
 
@@ -280,3 +282,14 @@ class OrderDetailView(View):
             'items': [{'menu_item': item.menu_item.name, 'quantity': item.quantity} for item in items]
         }
         return JsonResponse(data)
+
+class OrderViewSet(viewsets.ModelViewSet):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+
+    @action(methods=['post'], detail=False, permission_classes=[IsAuthenticated])
+    def create_order(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

@@ -1,11 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, TextInput, Image, ScrollView } from "react-native";
 import { COLORS, FONTS, SIZES, icons } from "../../constants";
 import TextButton from "../../components/TextButton";
+import axios from 'axios';
 
 const Checkout = ({ route, navigation }) => {
     const { store, quantities, total } = route.params;
     const [selectedPayment, setSelectedPayment] = useState(null);
+
+    useEffect(() => {
+        // Log the data received from route.params
+        console.log('Store:', store);
+        console.log('Quantities:', quantities);
+        console.log('Total:', total);
+    }, []);
 
     const renderSelectedFoods = () => {
         return Object.keys(quantities).map((foodId) => {
@@ -21,11 +29,34 @@ const Checkout = ({ route, navigation }) => {
         });
     };
 
-    const handleConfirmOrder = () => {
-        if (selectedPayment === "cod") {
-            navigation.replace("Success");
-        } else {
+    const handleConfirmOrder = async () => {
+        if (!selectedPayment) {
             alert("Vui lòng chọn phương thức thanh toán!");
+            return;
+        }
+
+        const orderData = {
+            store: store.id,
+            total_amount: total,
+            payment_method: selectedPayment,
+            order_items: Object.keys(quantities).map(foodId => ({
+                menu_item: parseInt(foodId),
+                quantity: quantities[foodId]
+            }))
+        };
+
+        try {
+            const response = await axios.post('http://your-api-url/orders/create_order/', orderData, {
+                headers: {
+                    Authorization: `Bearer ${your_token}`
+                }
+            });
+            if (response.status === 201) {
+                navigation.replace("Success");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Đã xảy ra lỗi khi đặt hàng. Vui lòng thử lại.");
         }
     };
 
@@ -70,16 +101,16 @@ const Checkout = ({ route, navigation }) => {
                         alignItems: "center",
                         padding: SIZES.radius,
                         borderWidth: 1,
-                        borderColor: selectedPayment === "cod" ? COLORS.primary : COLORS.gray2,
+                        borderColor: selectedPayment === "cash" ? COLORS.primary : COLORS.gray2,
                         borderRadius: SIZES.radius,
                         marginBottom: SIZES.base,
-                        backgroundColor: selectedPayment === "cod" ? COLORS.lightGray1 : COLORS.white,
+                        backgroundColor: selectedPayment === "cash" ? COLORS.lightGray1 : COLORS.white,
                     }}
-                    onPress={() => setSelectedPayment("cod")}
+                    onPress={() => setSelectedPayment("cash")}
                 >
                     <Image source={icons.cash} style={{ width: 24, height: 24, marginRight: SIZES.radius }} />
                     <Text style={{ flex: 1, ...FONTS.body3 }}>Thanh toán khi nhận hàng</Text>
-                    {selectedPayment === "cod" && <Image source={icons.check} style={{ width: 20, height: 20, tintColor: COLORS.primary }} />}
+                    {selectedPayment === "cash" && <Image source={icons.check} style={{ width: 20, height: 20, tintColor: COLORS.primary }} />}
                 </TouchableOpacity>
 
                 {/* VNPay */}
