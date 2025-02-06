@@ -5,6 +5,7 @@ import TextButton from "../../components/TextButton";
 import { MyUserContext } from "../../configs/MyUserContext";
 import { authApis, endpoints } from "../../configs/APIs";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 const Checkout = ({ route, navigation }) => {
     const { store, quantities, total } = route.params;
@@ -16,7 +17,7 @@ const Checkout = ({ route, navigation }) => {
         const fetchToken = async () => {
             const storedToken = await AsyncStorage.getItem('token');
             setToken(storedToken);
-            console.log('Stored Token:', storedToken); // Log the stored token to ensure it's being retrieved correctly
+            console.log('Stored Token:', storedToken);
         };
 
         fetchToken();
@@ -47,17 +48,29 @@ const Checkout = ({ route, navigation }) => {
             return;
         }
 
-        const orderItems = Object.keys(quantities).map(foodId => {
+        const orderItems = await Promise.all(Object.keys(quantities).map(async (foodId) => {
             const food = store.foods.find((item) => item.id === parseInt(foodId));
             if (!food) {
                 console.error(`Food item with ID ${foodId} does not exist.`);
                 return null;
             }
+
+            // Fetch menu details for the food item
+            let menuItem = null;
+            if (food.menu) {
+                try {
+                    const response = await axios.get(endpoints.menuDetails(food.menu));
+                    menuItem = response.data.id;
+                } catch (error) {
+                    console.error(`Failed to fetch menu details for food ID ${foodId}:`, error);
+                }
+            }
+
             return {
-                menu_item: parseInt(foodId),
+                menu_item: menuItem,
                 quantity: quantities[foodId]
             };
-        }).filter(item => item !== null);
+        }));
 
         if (orderItems.length === 0) {
             alert("Không có món ăn hợp lệ để đặt hàng.");
@@ -69,13 +82,19 @@ const Checkout = ({ route, navigation }) => {
             store: store.id,
             total_amount: total.toString(), // Convert total to string
             payment_method: selectedPayment,
-            order_items: orderItems
+            order_items: orderItems.filter(item => item !== null)
         };
+
+        // Log the order data before sending
+        console.log('>>>>> Order Data:', orderData);
 
         try {
             const response = await authApis(token).post(endpoints.createOrder, orderData);
             if (response.status === 201) {
                 navigation.replace("Success");
+            } else {
+                console.error('Failed to create order:', response.data);
+                alert("Đã xảy ra lỗi khi đặt hàng. Vui lòng thử lại.");
             }
         } catch (error) {
             console.error('Error response:', error.response); // Log the error response for debugging

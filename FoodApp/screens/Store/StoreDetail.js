@@ -227,8 +227,24 @@ const StoreDetail = () => {
       return null;
     }
 
-    const checkoutData = { store: { ...store, foods: [...foods, ...menus.flatMap(menu => menu.foods)] }, quantities, total };
-    console.log('Checkout Data:', checkoutData); // Log checkout data
+    const checkoutData = {
+      store: {
+        ...store,
+        foods: [...foods, ...menus.flatMap(menu => menu.foods).map(food => ({ ...food, menu: food.menu || null }))]
+      },
+      quantities,
+      total
+    };
+
+    // Log detailed checkoutData
+    console.log('>>>> Navigating to Checkout with data:');
+    console.log('Store:', checkoutData.store);
+    console.log('Quantities:', checkoutData.quantities);
+    console.log('Total:', checkoutData.total);
+    console.log('Foods:');
+    checkoutData.store.foods.forEach(food => {
+      console.log(`- ${food.name} (Menu: ${food.menu}): ${checkoutData.quantities[food.id] || 0}`);
+    });
 
     return (
       <View
@@ -259,7 +275,7 @@ const StoreDetail = () => {
           }}
           label="Thanh Toán"
           onPress={() => {
-            console.log('Navigating to Checkout with data:', checkoutData); // Log data before navigating
+            console.log('>>>> Navigating to Checkout with data:', checkoutData); // Log data before navigating
             navigation.navigate("Checkout", checkoutData);
           }}
         />

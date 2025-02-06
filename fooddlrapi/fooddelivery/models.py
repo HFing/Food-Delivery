@@ -80,11 +80,14 @@ class Order(Base):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='orders')
-    menu_items = models.ManyToManyField(Menu, through='OrderItem')
+    food_items = models.ManyToManyField(Food, through='OrderItem')
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=50, choices=PAYMENT_CHOICES)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Order #{self.id} by {self.user.username}"
 
 
     def __str__(self):
@@ -93,7 +96,7 @@ class Order(Base):
 # OrderItem model (Thông tin món ăn trong đơn hàng)
 class OrderItem(Base):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
-    menu_item = models.ForeignKey(Menu, on_delete=models.CASCADE, null=True, blank=True)
+    food_item = models.ForeignKey(Food, on_delete=models.CASCADE, null=True, blank=True)
     quantity = models.PositiveIntegerField(default=1)
 
 # Review model (Thông tin đánh giá)
