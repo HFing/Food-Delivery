@@ -79,7 +79,15 @@ const OrderHistory = ({ navigation }) => {
                 renderItem={({ item }) => (
                     <TouchableOpacity
                         style={styles.orderItem}
-                        onPress={() => navigation.navigate('DeliveryStatus', { orderId: item.id })}
+                        onPress={() => {
+                            console.log('Navigating to DeliveryStatus with orderId:', item.id);
+                            navigation.navigate('DeliveryStatus', {
+                                orderId: item.id,
+                                status: item.status,
+                                createdAt: item.created_at,
+                                id: item.id
+                            });
+                        }}
                     >
                         <Text style={styles.orderId}>Order ID: {item.id}</Text>
                         <Text style={styles.orderAmount}>Total Amount: {formatCurrency(item.total_amount)}</Text>

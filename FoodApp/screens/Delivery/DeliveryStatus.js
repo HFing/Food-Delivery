@@ -9,9 +9,22 @@ import {
 import { Header2, Linedevider, TextButton } from '../../components'
 import { FONTS, COLORS, SIZES, icons, constants } from '../../constants';
 
-const DeliveryStatus = ({ navigation }) => {
+const DeliveryStatus = ({ route, navigation }) => {
+    const { orderId, status, createdAt, id } = route.params; // Nhận tham số orderId, status, createdAt và id từ route
 
-    const [currentStep, setCurrentStep] = React.useState(2);
+
+    const [currentStep, setCurrentStep] = React.useState(() => {
+        switch (status) {
+            case 'pending':
+                return 0;
+            case 'confirmed':
+                return 1;
+            case 'shipped':
+                return 2;
+            default:
+                return 0;
+        }
+    });
 
     const renderHeader = () => {
         return (
@@ -35,12 +48,18 @@ const DeliveryStatus = ({ navigation }) => {
                 <Text style={{ textAlign: 'center', color: COLORS.gray, ...FONTS.body4 }}>
                     Estimated Delivery
                 </Text>
-                <Text style={{ textAlign: 'center', ...FONTS.h2 }}>21 Sept 2021/ 12.30PM</Text>
+                <Text style={{ textAlign: 'center', ...FONTS.h2 }}>{new Date(createdAt).toLocaleDateString()}</Text>
             </View>
         )
     }
 
     const renderTrackOrder = () => {
+        const trackOrderStatus = [
+            { title: 'Pending', sub_title: 'Chưa xác nhận' },
+            { title: 'Confirmed', sub_title: 'Đã xác nhận' },
+            { title: 'Shipped', sub_title: 'Đã vận chuyển' }
+        ];
+
         return (
             <View style={{
                 marginTop: SIZES.padding,
@@ -59,14 +78,14 @@ const DeliveryStatus = ({ navigation }) => {
                     paddingHorizontal: SIZES.padding
                 }}>
                     <Text style={{ ...FONTS.h3 }}>Track Order</Text>
-                    <Text style={{ color: COLORS.gray, ...FONTS.body3 }}>PN012345</Text>
+                    <Text style={{ color: COLORS.gray, ...FONTS.body3 }}>{id}</Text>
                 </View>
 
                 <Linedevider lineStyle={{ backgroundColor: COLORS.lightGray2 }} />
 
                 {/* Status */}
                 <View style={{ marginTop: SIZES.padding, paddingHorizontal: SIZES.padding }}>
-                    {constants.track_order_status.map((item, index) => {
+                    {trackOrderStatus.map((item, index) => {
                         return (
                             <View key={`StatusList-${index}`}>
                                 <View style={{
@@ -90,7 +109,7 @@ const DeliveryStatus = ({ navigation }) => {
                                     </View>
                                 </View>
 
-                                {index < constants.track_order_status.length - 1 &&
+                                {index < trackOrderStatus.length - 1 &&
                                     <View>
                                         {index < currentStep &&
                                             <View style={{
@@ -130,7 +149,7 @@ const DeliveryStatus = ({ navigation }) => {
                 marginTop: SIZES.radius,
                 marginBottom: SIZES.padding
             }}>
-                {currentStep < constants.track_order_status.length - 1 &&
+                {currentStep < 2 &&
                     <View style={{
                         flexDirection: 'row',
                         height: 55
@@ -142,7 +161,7 @@ const DeliveryStatus = ({ navigation }) => {
                                 borderRadius: SIZES.base,
                                 backgroundColor: COLORS.lightGray2
                             }}
-                            label="Cancel"
+                            label="Home"
                             labelStyle={{
                                 color: COLORS.primary
                             }}
@@ -150,7 +169,7 @@ const DeliveryStatus = ({ navigation }) => {
                         />
                     </View>
                 }
-                {currentStep >= constants.track_order_status.length - 1 &&
+                {currentStep >= 2 &&
                     <TextButton
                         buttonContainerStyle={{
                             height: 55,

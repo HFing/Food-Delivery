@@ -3,13 +3,14 @@ import { View, Text, Image, FlatList, TouchableOpacity } from 'react-native';
 import { FONTS, SIZES, COLORS, icons } from '../../constants';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import axios, { endpoints } from '../../configs/APIs';
-import { StepperInput, TextButton } from '../../components'; // Import StepperInput and TextButton
+import { StepperInput, TextButton } from '../../components';
 
 const StoreDetail = () => {
   const [store, setStore] = useState(null);
   const [menus, setMenus] = useState([]);
   const [foods, setFoods] = useState([]);
   const [quantities, setQuantities] = useState({});
+  const [isFollowing, setIsFollowing] = useState(false);
   const navigation = useNavigation();
   const route = useRoute();
   const { storeId } = route.params;
@@ -46,7 +47,6 @@ const StoreDetail = () => {
       }));
 
       const foodsWithoutMenu = res.data.filter(food => food.menu === null);
-
 
       setMenus(menusWithFoods);
       setFoods(foodsWithoutMenu);
@@ -92,6 +92,11 @@ const StoreDetail = () => {
     const total = totalFoods + totalMenus;
 
     return total;
+  };
+
+  const handleFollow = () => {
+    setIsFollowing(!isFollowing);
+    // Thêm logic để gọi API follow/unfollow nếu cần
   };
 
   const renderHeader = () => {
@@ -154,6 +159,17 @@ const StoreDetail = () => {
         <Text style={{ ...FONTS.body3, color: COLORS.darkGray, marginTop: SIZES.base }}>
           {store?.description}
         </Text>
+        <TextButton
+          buttonContainerStyle={{
+            marginTop: SIZES.padding,
+            paddingHorizontal: SIZES.padding,
+            paddingVertical: SIZES.base,
+            borderRadius: SIZES.radius,
+            backgroundColor: isFollowing ? COLORS.gray : COLORS.primary,
+          }}
+          label={isFollowing ? "Following" : "Follow"}
+          onPress={handleFollow}
+        />
       </View>
     );
   };
@@ -227,8 +243,6 @@ const StoreDetail = () => {
       quantities,
       total
     };
-
-
 
     return (
       <View

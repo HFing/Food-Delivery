@@ -100,18 +100,10 @@ class FoodViewSet(viewsets.ModelViewSet):
     @action(methods=['get'], detail=False, url_path='search', permission_classes=[permissions.AllowAny])
     def search_foods(self, request):
         name = request.query_params.get('name', None)
-        price = request.query_params.get('price', None)
-        food_type = request.query_params.get('type', None)
         store = request.query_params.get('store', None)
-
-        foods = Food.objects.all()
-
+        foods = Food.objects.filter(is_available=True)
         if name:
             foods = foods.filter(name__icontains=name)
-        if price:
-            foods = foods.filter(price=price)
-        if food_type:
-            foods = foods.filter(type__icontains=food_type)
         if store:
             foods = foods.filter(store__name__icontains=store)
 
