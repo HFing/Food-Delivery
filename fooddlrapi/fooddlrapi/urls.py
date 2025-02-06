@@ -31,4 +31,7 @@ urlpatterns = [
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('auth/', include('dj_rest_auth.urls')),  # API login, logout
+    path('auth/registration/', include('dj_rest_auth.registration.urls')),  # API đăng ký
+    path('auth/social/', include('allauth.socialaccount.urls')),  # API Google OAuth
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
