@@ -1,4 +1,135 @@
 {% extends 'admin/base_site.html' %}
 {% block content %}
-    <h1>Statistics</h1>
+    <div class="container">
+        <h1>Statistics</h1>
+        <div class="chart-container">
+            <canvas id="totalRevenueChart"></canvas>
+            <canvas id="productsPerStoreChart"></canvas>
+
+        </div>
+    </div>
+
+    <style>
+        .chart-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .chart-container canvas {
+            width: 400px !important;
+            height: 400px !important;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .chart-container canvas:hover {
+            transform: scale(1.05);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 24px;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        async function fetchProductsPerStoreData() {
+            const response = await fetch('/admin/products_per_store/');
+            const data = await response.json();
+            return data;
+        }
+
+        async function renderProductsPerStoreChart() {
+            const data = await fetchProductsPerStoreData();
+            const ctx = document.getElementById('productsPerStoreChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Products per Store',
+                        data: data.counts,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                }
+            });
+        }
+
+        async function fetchTotalRevenueData(period) {
+            const response = await fetch(`/admin/total_revenue/${period}/`);
+            const data = await response.json();
+            return data;
+        }
+
+        async function renderTotalRevenueChart(period) {
+            const data = await fetchTotalRevenueData(period);
+            const ctx = document.getElementById('totalRevenueChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Total Revenue',
+                        data: data.revenue,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProductsPerStoreChart();
+            renderTotalRevenueChart('monthly');
+        });
+    </script>
 {% endblock %}

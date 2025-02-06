@@ -23,7 +23,7 @@ from fooddelivery.serializers import OrderSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 import json
-
+from .dao import get_monthly_revenue, get_quarterly_revenue, get_yearly_revenue, get_best_selling_foods
 
 
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
@@ -41,8 +41,6 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-
-    
 
 class StoreViewSet(viewsets.ModelViewSet):
     queryset = Store.objects.filter(is_active=True)
@@ -77,9 +75,6 @@ class StoreViewSet(viewsets.ModelViewSet):
 
         serializer = serializers.FoodSerializer(foods, many=True)
         return Response(serializer.data)
-
-    
-
 
 class MenuViewSet(viewsets.ModelViewSet):
     queryset = Menu.objects.all()
@@ -117,6 +112,34 @@ class FoodViewSet(viewsets.ModelViewSet):
         random_foods = random.sample(list(foods), min(len(foods), 5))
         serializer = self.get_serializer(random_foods, many=True)
         return Response(serializer.data)
+
+class BestSellingFoodsChartView(View):
+    def get(self, request):
+        store_id = request.user.store.id
+        data = get_best_selling_foods(store_id)
+        labels = [entry['food_item__name'] for entry in data]
+        sold = [entry['total_sold'] for entry in data]
+        return JsonResponse({'labels': labels, 'sold': sold})
+
+class ProductsPerStoreChartView(View):
+    def get(self, request):
+        stores = Store.objects.all()
+        labels = [store.name for store in stores]
+        counts = [store.foods.count() for store in stores]
+        return JsonResponse({'labels': labels, 'counts': counts})
+
+class TotalRevenueChartView(View):
+    def get(self, request, period):
+        if period == 'monthly':
+            data = get_monthly_revenue()
+        elif period == 'yearly':
+            data = get_yearly_revenue()
+        else:
+            return JsonResponse({'error': 'Invalid period'}, status=400)
+
+        labels = [entry['month'] if period == 'monthly' else entry['year'] for entry in data]
+        revenue = [entry['total_revenue'] for entry in data]
+        return JsonResponse({'labels': labels, 'revenue': revenue})
 
 @login_required
 def store_dashboard(request):
@@ -195,6 +218,21 @@ class ChangeOrderStatusView(View):
         else:
             return JsonResponse({'success': False, 'error': 'Invalid status'})
 
+class RevenueChartView(View):
+    def get(self, request, period):
+        store_id = request.user.store.id
+        if period == 'monthly':
+            data = get_monthly_revenue(store_id)
+        elif period == 'quarterly':
+            data = get_quarterly_revenue(store_id)
+        elif period == 'yearly':
+            data = get_yearly_revenue(store_id)
+        else:
+            return JsonResponse({'error': 'Invalid period'}, status=400)
+
+        labels = [entry['month'] if period == 'monthly' else entry['quarter'] if period == 'quarterly' else entry['year'] for entry in data]
+        revenue = [entry['total_revenue'] for entry in data]
+        return JsonResponse({'labels': labels, 'revenue': revenue})
 
 class MenuCreateView(CreateView):
     model = Menu
@@ -313,3 +351,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(methods=['get'], detail=False, permission_classes=[permissions.IsAuthenticated])
+    def user_orders(self, request):
+        user = request.user
+        orders = Order.objects.filter(user=user)
+        serializer = self.get_serializer(orders, many=True)
+        return Response(serializer.data)

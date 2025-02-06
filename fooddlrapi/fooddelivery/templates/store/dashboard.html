@@ -49,6 +49,22 @@
             color: white;
             font-size: 20px;
         }
+        .chart-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        .chart-container canvas {
+            width: 400px !important;
+            height: 400px !important;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -57,7 +73,6 @@
         <ul>
             <li><a href="/store/menu_food_management">Quản lý menu & Food</a></li>
             <li><a href="/store/orders/">Nhận & xác nhận đơn hàng</a></li>
-
             <li><a href="#">Xử lý đánh giá & bình luận</a></li>
             <li><a href="update">Cập nhật thông tin cửa hàng</a></li>
             <li><a href="/logout">Đăng xuất</a></li>
@@ -65,7 +80,94 @@
     </div>
     <div class="content">
         <div class="header">Welcome to Store Dashboard</div>
-        <p>Chọn một chức năng từ thanh menu bên trái.</p>
+        <p>Thống kê doanh thu</p>
+        <label for="period">Chọn khoảng thời gian:</label>
+        <select id="period" onchange="renderChart(this.value)">
+            <option value="monthly">Tháng</option>
+            <option value="quarterly">Quý</option>
+            <option value="yearly">Năm</option>
+        </select>
+        <div class="chart-container">
+            <canvas id="revenueChart"></canvas>
+            <canvas id="bestSellingFoodsChart"></canvas>
+        </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        async function fetchRevenueData(period) {
+            const response = await fetch(`/store/revenue/${period}/`);
+            const data = await response.json();
+            return data;
+        }
+
+        async function renderChart(period) {
+            const data = await fetchRevenueData(period);
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: data.revenue,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        async function fetchBestSellingFoodsData() {
+            const response = await fetch(`/store/best_selling_foods/`);
+            const data = await response.json();
+            return data;
+        }
+
+        async function renderBestSellingFoodsChart() {
+            const data = await fetchBestSellingFoodsData();
+            const ctx = document.getElementById('bestSellingFoodsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Best Selling Foods',
+                        data: data.sold,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderChart('monthly'); // Default to monthly revenue
+            renderBestSellingFoodsChart();
+        });
+    </script>
 </body>
 </html>
