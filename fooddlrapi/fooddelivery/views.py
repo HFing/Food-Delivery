@@ -236,6 +236,11 @@ class RevenueChartView(View):
         revenue = [entry['total_revenue'] for entry in data]
         return JsonResponse({'labels': labels, 'revenue': revenue})
 
+class UsersCountChartView(View):
+    def get(self, request):
+        users_count = User.objects.count()
+        return JsonResponse({'users_count': users_count})
+
 class MenuCreateView(CreateView):
     model = Menu
     form_class = MenuForm

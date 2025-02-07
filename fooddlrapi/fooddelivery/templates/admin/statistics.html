@@ -5,7 +5,7 @@
         <div class="chart-container">
             <canvas id="totalRevenueChart"></canvas>
             <canvas id="productsPerStoreChart"></canvas>
-
+            <canvas id="usersCountChart"></canvas> <!-- New chart for user count -->
         </div>
     </div>
 
@@ -127,9 +127,34 @@
             });
         }
 
+        async function fetchUsersCountData() {
+            const response = await fetch('/admin/users_count/');
+            const data = await response.json();
+            return data;
+        }
+
+        async function renderUsersCountChart() {
+            const data = await fetchUsersCountData();
+            const ctx = document.getElementById('usersCountChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Users'],
+                    datasets: [{
+                        label: 'Users Count',
+                        data: [data.users_count],
+                        backgroundColor: ['rgba(75, 192, 192, 0.2)'],
+                        borderColor: ['rgba(75, 192, 192, 1)'],
+                        borderWidth: 1
+                    }]
+                }
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             renderProductsPerStoreChart();
             renderTotalRevenueChart('monthly');
+            renderUsersCountChart(); // Render the new user count chart
         });
     </script>
 {% endblock %}

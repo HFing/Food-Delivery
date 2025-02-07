@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework import routers
 from fooddelivery import views
-from .views import store_dashboard, CustomLoginView, StoreRegistrationView, StoreUpdateView, MenuCreateView, MenuFoodManagementView, FoodCreateView, MenuUpdateView, FoodUpdateView,custom_logout_view, OrdersByDateView, OrderDetailView, OrderViewSet, ChangeOrderStatusView, RevenueChartView, BestSellingFoodsChartView, ProductsPerStoreChartView, TotalRevenueChartView, OrderDetailView
+from .views import store_dashboard, CustomLoginView, StoreRegistrationView, StoreUpdateView, MenuCreateView, MenuFoodManagementView, FoodCreateView, MenuUpdateView, FoodUpdateView,custom_logout_view, OrdersByDateView, OrderDetailView, OrderViewSet, ChangeOrderStatusView, RevenueChartView, BestSellingFoodsChartView, ProductsPerStoreChartView, TotalRevenueChartView, OrderDetailView, UsersCountChartView
 from django.contrib.auth import views as auth_views
 
 routers = routers.DefaultRouter()
@@ -33,4 +33,6 @@ urlpatterns = [
     path('store/best_selling_foods/', BestSellingFoodsChartView.as_view(), name='best_selling_foods_chart'),
     path('admin/products_per_store/', ProductsPerStoreChartView.as_view(), name='products_per_store_chart'),
     path('admin/total_revenue/<str:period>/', TotalRevenueChartView.as_view(), name='total_revenue_chart'),
+    path('admin/users_count/', UsersCountChartView.as_view(), name='users_count_chart'),
+
 ]
